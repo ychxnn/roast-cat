@@ -3,11 +3,11 @@
 
 const { EventEmitter } = require('events');
 const { getTerminalContent }  = require('../infra/applescript');
-const { stripAnsi, isAiSession, lastUserPrompt, errorSignature } = require('../core/patterns');
+const { stripAnsi, isAiSession, detectTool, lastUserPrompt, errorSignature } = require('../core/patterns');
 const {
   contextRotMilestone, cogWallReached,
   isErrorLoop, isPanicPrompting, isNoContextPrompt,
-  isPostOutputSilence, isWeekendOverwork, isMidnight,
+  isPostOutputSilence, isMidnight,
 } = require('../core/triggers');
 
 class Monitor extends EventEmitter {
@@ -22,6 +22,7 @@ class Monitor extends EventEmitter {
     this._lastActivityAt = null;
     this._fired          = new Set();
     this._cooldowns      = {};
+    this._tool           = null; // which CLI tool is in the current buffer (for the Watch filter)
   }
 
   start() {
@@ -40,7 +41,7 @@ class Monitor extends EventEmitter {
 
   _fire(trigger, emotion) {
     this._cooldowns[trigger] = Date.now();
-    this.emit('context', { trigger, emotion });
+    this.emit('context', { trigger, emotion, app: this._tool });
   }
 
   _fireOnce(trigger, emotion) {
@@ -61,17 +62,19 @@ class Monitor extends EventEmitter {
 
   async _poll() {
     const raw = await getTerminalContent();
-    if (raw === null) { this._timeBased(); return; }
+    if (raw === null) { this._tool = null; this._timeBased(); return; }
     this._analyze(stripAnsi(raw));
   }
 
   _analyze(content) {
     if (!isAiSession(content)) {
       if (this._sessionStart) this._resetSession();
+      this._tool = null;
       this._timeBased();
       return;
     }
 
+    this._tool = detectTool(content); // tag terminal-based roasts with the active CLI tool
     const now = Date.now();
     if (!this._sessionStart || content.length < this._prevLen * 0.4) {
       this._resetSession();
@@ -122,11 +125,12 @@ class Monitor extends EventEmitter {
       this._fire('postOutput', 'smug');
     }
 
-    // Weekend overwork
-    if (isWeekendOverwork(this._sessionStart, this._fired)) this._fireOnce('weekendOverwork', 'bored');
+    // (weekend overwork now lives in the activity tracker so it works without
+    //  Accessibility — see src/service/usage.js)
 
-    this._timeBased();
     this._prevLen = content.length;
+    this._tool = null;   // midnight is time-based → goes to all cats, not a tool
+    this._timeBased();
   }
 
   _timeBased() {

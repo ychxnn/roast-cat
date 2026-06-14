@@ -23,6 +23,20 @@ function isAiSession(content) {
   return CLI_SIGNALS.some(p => p.test(content));
 }
 
+// Which specific CLI tool is in the buffer (for the per-cat "Watch" filter).
+// Returns null for a generic AI session (e.g. only "Human:/Assistant:").
+const TOOL_SIGNALS = [
+  ['claude', /\bclaude\b/i],
+  ['aider',  /\baider\b|aider>/i],
+  ['codex',  /\bcodex\b/i],
+  ['sgpt',   /\bsgpt\b/i],
+  ['llm',    /\bllm\b/i],
+];
+function detectTool(content) {
+  for (const [name, rx] of TOOL_SIGNALS) if (rx.test(content)) return name;
+  return null;
+}
+
 function lastUserPrompt(content) {
   const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
   for (let i = lines.length - 1; i >= Math.max(0, lines.length - 40); i--) {
@@ -45,4 +59,4 @@ function errorSignature(text) {
   return null;
 }
 
-module.exports = { stripAnsi, isAiSession, lastUserPrompt, errorSignature };
+module.exports = { stripAnsi, isAiSession, detectTool, lastUserPrompt, errorSignature };

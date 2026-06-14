@@ -24,7 +24,7 @@ function getPrefsPath() {
 }
 
 // App-level preferences (not per-cat). Currently just onboarding state.
-const DEFAULT_PREFS = { onboarded: false, theme: 'pink', activity: 60, quiet: false };
+const DEFAULT_PREFS = { onboarded: false, theme: 'pink', activity: 60, quiet: false, sound: false, focusApps: [] };
 
 function loadPrefs() {
   try {

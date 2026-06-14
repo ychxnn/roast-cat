@@ -112,6 +112,10 @@ function syncCatWindows(cats, onMoved) {
 function dispatch(event, cats) {
   for (const cat of cats) {
     if (!cat.enabled) continue;
+    // Per-cat "Watch" filter: if a cat watches a specific CLI tool, only deliver
+    // tool-tagged roasts for that tool. Time/health events (event.app == null)
+    // and cats set to "any" always get everything.
+    if (event.app && cat.assignedApp && cat.assignedApp !== 'any' && cat.assignedApp !== event.app) continue;
     const win = catWindows.get(cat.id);
     if (win && !win.isDestroyed()) win.webContents.send('context', event);
   }

@@ -555,7 +555,8 @@ setInterval(spawnAmbient, 1100);
 // Free-roam = occasionally take a SMOOTH animated walk (main clamps to screen).
 let lifeTimer = null, glanceTimer = null, roasting = false, roastSeq = 0, walking = false;
 let mode = 'free'; // 'free' (zoomies) | 'static' (couch potato) — from cat.roam
-let behavior = { activity: 60, quiet: false }; // from app prefs (activity slider, quiet mode)
+let behavior = { activity: 60, quiet: false, sound: false }; // from app prefs
+let restRuns = 0; // consecutive rest cycles → doze off after a long lull
 
 function restPose() { return Math.random() < 0.72 ? 'loaf' : 'sit'; }
 // higher activity → shorter waits (more moving/cute moments). 0→1.6×, 60→1.0×, 100→0.6×
@@ -573,26 +574,43 @@ function scheduleLife() {
   }
 
   const f = lifeFactor();
+
+  // long lull → climb into a nap (doze)
+  if (restRuns >= 4) {
+    restRuns = 0;
+    setPose('flop');
+    lifeTimer = setTimeout(scheduleLife, (16000 + Math.random() * 14000) * f);
+    return;
+  }
+
   const r = Math.random();              // free roam
-  if (r < 0.55) {                       // rest in place
+  if (r < 0.50) {                       // rest in place
+    restRuns++;
     setPose(restPose());
     lifeTimer = setTimeout(scheduleLife, (12000 + Math.random() * 14000) * f);
-  } else if (r < 0.85) {                // take a stroll
+  } else if (r < 0.72) {                // a short stroll
+    restRuns = 0;
     takeAWalk(() => { lifeTimer = setTimeout(scheduleLife, (9000 + Math.random() * 12000) * f); });
+  } else if (r < 0.86) {                // wander to a screen edge and perch there
+    restRuns = 0;
+    takeAWalk(() => { lifeTimer = setTimeout(scheduleLife, (10000 + Math.random() * 12000) * f); }, true);
   } else {                              // be adorable
+    restRuns = 0;
     setPose('play');
     lifeTimer = setTimeout(scheduleLife, (6000 + Math.random() * 6000) * f);
   }
 }
 
 // Smooth, animated stroll — NEVER a teleport. Main clamps it inside the screen.
-function takeAWalk(done) {
+function takeAWalk(done, toEdge) {
   if (roasting || behavior.quiet || mode === 'static') { done(); return; }
   walking = true;
   setPose('stand');                    // legs-walking animation
-  const steps = 26 + Math.floor(Math.random() * 34);
-  const dirX = (Math.random() < 0.5 ? -1 : 1) * (1.1 + Math.random() * 1.6);
-  const dirY = (Math.random() - 0.5) * 1.0;
+  // toEdge = a long, committed walk in one direction → main clamps it at the
+  // screen edge, so the cat ends up perched against an edge.
+  const steps = toEdge ? (90 + Math.floor(Math.random() * 70)) : (26 + Math.floor(Math.random() * 34));
+  const dirX = (Math.random() < 0.5 ? -1 : 1) * (toEdge ? 2.3 : (1.1 + Math.random() * 1.6));
+  const dirY = toEdge ? 0 : (Math.random() - 0.5) * 1.0;
   wrap.classList.toggle('face-left', dirX < 0);
   let i = 0;
   (function step() {
@@ -621,6 +639,31 @@ function scheduleGlance() {
   }, w);
 }
 
+// ── Sound (synthesised, no asset files; off by default via prefs) ──
+let actx = null;
+function audioCtx() {
+  if (!actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch {} }
+  if (actx && actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function blip(freq, dur, when, type, gain) {
+  const a = audioCtx(); if (!a) return;
+  const t = a.currentTime + (when || 0);
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type || 'sine';
+  o.frequency.setValueAtTime(freq, t);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(gain || 0.05, t + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(a.destination);
+  o.start(t); o.stop(t + dur + 0.03);
+}
+function playSound(kind) {
+  if (!behavior.sound) return;
+  if (kind === 'pet') { blip(620, 0.12, 0, 'sine', 0.05); blip(820, 0.13, 0.1, 'sine', 0.045); } // soft chirp
+  else { blip(520, 0.15, 0, 'triangle', 0.05); blip(430, 0.22, 0.13, 'triangle', 0.05); }        // little meow
+}
+
 // ── Pet (click) — coherent happy reaction from a local, mood-keyed bank ──
 const PET_MSGS = {
   content: ['purrrr 🩷','ok that\'s the spot','mrrp','*headbonk*','you may pet me. once more.','♡','i tolerate you (affectionate)'],
@@ -646,6 +689,7 @@ function pet() {
   setTimeout(() => document.body.classList.remove('alert'), 350);
   if (now < petCooldownUntil) return;  // rapid clicks: keep purring, don't spam text
   petCooldownUntil = now + 1600;
+  playSound('pet');
   const pool = PET_MSGS[petMood()] || PET_MSGS.content;
   showBubble(pool[Math.floor(Math.random() * pool.length)], 4000);
   setTimeout(() => { if (!roasting) { setEmotion('idle'); } }, 4300);
@@ -678,6 +722,7 @@ async function doRoast(trigger, emotion) {
   if (body.roastPose === 'stand') setEmotion(e);
   showBubble(text, 9000);
   spawnParticles(e);
+  playSound('roast');
   await wait(9200);
   if (myId !== roastSeq) return;
 
