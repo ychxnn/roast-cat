@@ -5,15 +5,28 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "demo": "electron . --demo"
+    "demo": "electron . --demo",
+    "build": "electron-packager . RoastCat --platform=darwin --out=dist --overwrite",
+    "install-app": "cp -r dist/RoastCat-darwin-*/RoastCat.app /Applications/"
   },
-  "keywords": ["electron", "desktop-pet", "ai", "cli", "developer-tools", "productivity", "claude-cli", "aider", "codex"],
+  "keywords": [
+    "electron",
+    "desktop-pet",
+    "ai",
+    "cli",
+    "developer-tools",
+    "productivity",
+    "claude-cli",
+    "aider",
+    "codex"
+  ],
   "author": "",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@electron/packager": "^20.0.1",
     "electron": "^42.4.0"
   }
 }
