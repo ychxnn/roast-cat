@@ -1,18 +1,28 @@
-# 🐱 Roast Cat
+# Roast Cat
 
 A desktop cat that watches your AI CLI sessions and roasts you — with documented facts — when it catches you doing something wrong.
 
 > The AI can't tell you your context window is rotting. The cat can and will.
 
+[![CI](https://github.com/ychxnn/roast-cat/actions/workflows/ci.yml/badge.svg)](https://github.com/ychxnn/roast-cat/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+
 ---
 
-## Demo
+## Table of Contents
 
-```bash
-npm run demo
-```
-
-Cycles through all roast triggers so you can see the cat in action without an active AI session.
+- [Install](#install)
+- [Run the Demo](#run-the-demo)
+- [Supported Tools](#supported-tools)
+- [Roast Triggers](#roast-triggers)
+- [Cat Emotions](#cat-emotions)
+- [Why Each Roast is Justified](#why-each-roast-is-justified)
+- [Configure Cats](#configure-cats)
+- [Grant macOS Permissions](#grant-macos-permissions)
+- [Privacy](#privacy)
+- [Architecture](#architecture)
+- [Extend Roasts](#extend-roasts)
 
 ---
 
@@ -29,9 +39,19 @@ Requires [Node.js](https://nodejs.org) v18+.
 
 ---
 
-## What it watches
+## Run the Demo
 
-CLI tools running in Terminal, iTerm2, or Warp:
+```bash
+npm run demo
+```
+
+Cycles through all roast triggers so you can see the cat in action without an active AI session.
+
+---
+
+## Supported Tools
+
+The cat watches CLI tools running in Terminal, iTerm2, or Warp:
 
 | Tool | Detected by |
 |------|-------------|
@@ -45,7 +65,7 @@ CLI tools running in Terminal, iTerm2, or Warp:
 
 ---
 
-## What triggers a roast
+## Roast Triggers
 
 The cat never roasts you on a timer. Every roast has a specific, documented reason.
 
@@ -62,26 +82,7 @@ The cat never roasts you on a timer. Every roast has a specific, documented reas
 
 ---
 
-## macOS permissions (for session reading)
-
-**System Settings → Privacy & Security → Accessibility → enable Electron**
-
-Without this, the cat still runs. It catches midnight sessions and weekend overwork from the system clock alone. With it, it reads your terminal buffer and catches the prompting-behaviour triggers.
-
----
-
-## Settings
-
-Click 🐱 in the menu bar → **Settings** to:
-
-- Add / remove cats
-- Name each cat and pick a colour (orange, black, white, grey, pink)
-- Set size (small / medium / large)
-- Enable or disable individual cats
-
----
-
-## Cat emotions
+## Cat Emotions
 
 | Face | When |
 |------|------|
@@ -95,7 +96,7 @@ Click 🐱 in the menu bar → **Settings** to:
 
 ---
 
-## Why each roast is justified
+## Why Each Roast is Justified
 
 - **Context rot** — transformer attention degrades as context fills; the "middle token problem" is documented in LLM research
 - **Cognitive wall** — cognitive load studies consistently show performance degrades past 90 min of sustained focus
@@ -108,9 +109,22 @@ Click 🐱 in the menu bar → **Settings** to:
 
 ---
 
-## Adding roasts
+## Configure Cats
 
-Open `roasts.js`. Each trigger maps to an array of strings. Add yours. Rules: fact-based, meme tone, under ~200 chars if possible. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Click the cat icon in the menu bar, then open **Settings** to:
+
+- Add or remove cats
+- Name each cat and pick a colour (orange, black, white, grey, pink)
+- Set size (small / medium / large)
+- Enable or disable individual cats
+
+---
+
+## Grant macOS Permissions
+
+**System Settings → Privacy & Security → Accessibility → enable Electron**
+
+Without this, the cat still runs. It catches midnight sessions and weekend overwork from the system clock alone. With Accessibility enabled, it reads your terminal buffer and catches the prompting-behaviour triggers.
 
 ---
 
@@ -120,6 +134,29 @@ Open `roasts.js`. Each trigger maps to an array of strings. Add yours. Rules: fa
 - No session content written to disk
 - Terminal buffer is read, analyzed in memory, and discarded immediately
 - Only cat configuration (name, color, size) is persisted
+
+---
+
+## Architecture
+
+```
+src/
+  core/        — pure pattern matching, trigger logic (no I/O)
+  service/     — monitor orchestration, roast selection
+  infra/       — AppleScript execution, config file I/O
+interface/     — Electron tray, windows, IPC handlers
+renderer/      — cat.html, settings.html
+main.js        — entry point only
+preload.js     — IPC bridge
+```
+
+---
+
+## Extend Roasts
+
+Open `roasts.js`. Each trigger maps to an array of strings. Add yours.
+
+Rules: fact-based, meme tone, under ~200 chars if possible. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
