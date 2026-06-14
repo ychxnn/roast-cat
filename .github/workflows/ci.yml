@@ -18,7 +18,13 @@ jobs:
       - run: npm ci
       - name: Check all source files exist
         run: |
-          for f in main.js preload.js monitor.js roasts.js cat.html settings.html; do
+          for f in \
+            main.js preload.js \
+            src/core/patterns.js src/core/triggers.js \
+            src/infra/applescript.js src/infra/config.js \
+            src/service/monitor.js src/service/roasts.js \
+            interface/tray.js interface/windows.js interface/ipc.js \
+            renderer/cat.html renderer/settings.html; do
             [ -f "$f" ] || (echo "Missing: $f" && exit 1)
           done
           echo "All source files present."
