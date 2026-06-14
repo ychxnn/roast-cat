@@ -1,81 +1,106 @@
-// Every roast has a documented reason. No roast without evidence.
-// Tone: factual core + one-line meme kicker. Screenshot-worthy.
+// Short, punchy, meme-forward roasts. Every line still has a documented reason
+// baked in — just compressed. Rule: impactful > long. Screenshot-worthy one-liners.
 
 const ROASTS = {
 
-  // ── Trigger: session > 60 min ─────────────────────────────────────────────
+  // ── session > 60 min ──
   contextRot60: [
-    "you've been in this session for over an hour. transformer attention degrades as context fills — the model is already deprioritizing what you told it early on. this is documented behaviour, not a vibe.",
-    "60 minutes, one context window. the AI answering you now is not statistically the same as the one you briefed at the start. constraints get buried. decisions get overridden silently.",
-    "past the 60-min mark, context rot sets in. the model starts ignoring earlier instructions — not because it wants to, but because attention is finite. everything you set up at the start is competing with noise.",
+    "60 min in one chat. it forgot your first instruction 40 messages ago. context rot is crazy 💀",
+    "an hour deep. minute-one you is dead to this model. new chat, bestie.",
+    "this convo is cooked. attention's finite — restart it.",
   ],
 
-  // ── Trigger: session > 90 min ─────────────────────────────────────────────
+  // ── session > 90 min ──
   contextRot90: [
-    "90 minutes in one chat. researchers who study long-context AI behaviour call this the 'middle token problem' — the model loses track of what's in the middle of a long context. your earliest constraints are effectively gone.",
-    "you're past 90 minutes in a single session. the AI has seen so many failed attempts, corrections, and pivots that its output quality is measurably lower than minute one. start a new chat. seriously.",
-    "hour and a half. one context. the AI is now hallucinating functions it wrote 30 messages ago. this is not pessimism — it's what transformer attention does at this context length.",
+    "90 min, one context. it's hallucinating its own code now 💀",
+    "hour and a half. the middle of this chat is /dev/null. it forgot.",
+    "the model's got no object permanence at this length. fresh chat. now.",
   ],
 
-  // ── Trigger: session > 2hr ────────────────────────────────────────────────
+  // ── session > 2hr ──
   contextRot120: [
-    "two hours. the context window is a landfill at this point. every new output is being generated with degraded attention over a mountain of failed attempts and contradictory instructions. new chat. now.",
-    "you've been in this session for 2 hours. if the outputs are getting worse and weirder, that's not the model failing — that's context rot peaking. the fix is a new session, not more prompting.",
-    "2 hours, one AI session. whatever you started trying to build is buried under so much context noise the model is essentially guessing. close this. open a new one. write a clean brief.",
+    "2 hours, one chat. the context window is a landfill 🗑️ new session.",
+    "outputs getting weird? that's not the model, that's the rot. restart.",
+    "2hr session. it's guessing AND gaslighting you. close it.",
   ],
 
-  // ── Trigger: 90-min cognitive wall ────────────────────────────────────────
+  // ── 90-min cognitive wall ──
   cogWall: [
-    "90 minutes of continuous focus. cognitive load research consistently finds performance degrades past this threshold — not because you're tired, but because working memory genuinely fills up. 5 minutes away from the screen restores measurable capacity.",
-    "the 90-minute focus wall is real and documented. your ability to catch logical errors right now is lower than it was at the start. this is not motivational poster content, it's how the prefrontal cortex works.",
-    "past 90 min of sustained focus your brain's error-detection drops. which means you and the AI are both at a disadvantage right now. break. come back. the code is not going anywhere.",
+    "90 min locked in. brain cache full. 5 min break = hard refresh.",
+    "you hit the focus wall. not dumb, just full. go touch grass 🌱",
+    "working memory at 100%. you'll catch the bug after a break, not before.",
   ],
 
-  // ── Trigger: same error pasted 3+ times ──────────────────────────────────
+  // ── same error 3+ times ──
   errorLoop: [
-    "that error has appeared in this session at least 3 times. the AI has no new information each time you paste it. YOU do — you now know 2 approaches that don't work. that's a diagnosis, not just a paste.",
-    "pasting the same traceback multiple times is not debugging. the AI will generate a different-sounding answer each time and all of them will miss the root cause. read the error. locate the line. then prompt.",
-    "the AI can't fix what it hasn't been told to look for. 3 occurrences of the same error means the approach is wrong, not the prompt. step back before you paste it again.",
-    "you've shown the AI the same error repeatedly. it will confidently give you a new-sounding wrong answer every time. errors have root causes. find the cause. then bring it to the AI.",
+    "same error, 3rd time. the AI's got nothing new. you do. read it 🔍",
+    "pasting the traceback again is not a personality. find the line.",
+    "this error is giving 'you didn't actually read it'. it has a root cause.",
   ],
 
-  // ── Trigger: 4+ prompts in under 60 seconds ───────────────────────────────
+  // ── 4+ prompts in under 60s ──
   panicPrompt: [
-    "4 prompts in under a minute. rapid-fire prompting fills your context window with low-signal turns. the model does not process faster because you send faster. it just has less room for good reasoning.",
-    "sending prompts faster does not make the AI smarter. it fills the context with noise and degrades the quality of what comes next. slow down. one clear prompt with full context beats four panicked ones.",
-    "panic prompting detected. each rapid follow-up you send before reading the previous output shrinks the useful context available. the AI's quality drops proportionally. breathe. read first.",
-    "you sent multiple prompts in quick succession without waiting for a useful response. this is the AI equivalent of hitting a vending machine repeatedly. it doesn't help and it costs you context.",
+    "4 prompts in a minute. you're mashing the vending machine 💀",
+    "slow down bestie. spam ≠ speed. one good prompt > four panicked ones.",
+    "rapid-firing just feeds it noise. breathe, then prompt.",
   ],
 
-  // ── Trigger: 'fix this' / 'debug' with no error or code context ───────────
+  // ── 'fix this' with no context ──
   noContext: [
-    "'fix this' or 'debug' with no error message, no stack trace, no reproduction steps. the AI will guess. its guess will sound confident. it will be wrong. then you'll paste it again.",
-    "asking the AI to debug without the error is asking a doctor to diagnose without symptoms. the model will confabulate a plausible-sounding answer. plausible is not correct.",
-    "the three things a debugging prompt needs: what you expected, what happened, where it happened. your prompt had zero of those. the AI's answer will have the same quality as your input.",
-    "the AI needs the error message, the relevant code, and what you tried. 'it doesn't work' contains none of that. the output will reflect the quality of the input.",
+    "'fix this' with no error? it'll guess. confidently. wrongly.",
+    "debugging by vibes. give it symptoms or get fan-fiction.",
+    "what you expected, what happened, where. you gave it none of that 💀",
   ],
 
-  // ── Trigger: large output, then silence for 2+ min ────────────────────────
+  // ── large output, then silence ──
   postOutput: [
-    "the AI just produced a large output and you haven't asked a single follow-up question. 16 of 18 AI-code production failures studied in 2025 started with unreviewed large outputs. you are the peer review.",
-    "large AI output, zero follow-up questions. the model is not peer-reviewed. it does not catch its own edge cases, unhandled nulls, or logic that breaks outside the happy path. someone has to. that's you.",
-    "you accepted a significant block of AI output without questioning it. this is how subscription systems get accidentally bypassed and databases get silently corrupted. read it before you run it.",
-    "a large output with no verification step is a liability, not a deliverable. the AI does not know your production constraints, your edge cases, or what 'done' actually means. you do.",
+    "huge output, zero questions. you ARE the code review. read it.",
+    "you accepted that wall of code raw. that's a prod incident loading 🫡",
+    "it doesn't catch its own edge cases. that part's literally your job.",
   ],
 
-  // ── Trigger: weekend + session > 2hr ─────────────────────────────────────
+  // ── weekend + session > 2hr ──
   weekendOverwork: [
-    "2 hours coding on a weekend. burnout research consistently links this pattern to reduced cognitive output on Monday and Tuesday. you're borrowing against the week.",
-    "weekend session past 2 hours. recovery time is not optional for the brain — it's when memory consolidates and creative problem-solving resets. what you're doing right now has a measurable cost later.",
-    "2+ hours on your day off. the research on recovery and performance is unambiguous: this trade-off doesn't pay out the way it feels like it does in the moment.",
+    "2hr grind on a weekend. you're borrowing from monday-you. they're livid.",
+    "recovery isn't optional, it's the patch notes. log off 🌱",
+    "the repo survives without you for a day. main character moment: rest.",
   ],
 
-  // ── Trigger: after midnight + AI session active ────────────────────────────
+  // ── after midnight + active ──
   midnight: [
-    "it's past midnight and you're in an active AI coding session. sleep deprivation at this level impairs logical reasoning at roughly the same rate as a blood alcohol level of 0.05. your PR reviewers will be sober.",
-    "after midnight, your prefrontal cortex — the part that catches bad logic and edge cases — is measurably offline. the AI makes the same mistakes at 2am as at 2pm. you don't.",
-    "coding past midnight: the bugs you introduce now will take you 3x longer to find tomorrow. this is documented in software engineering research, not just a feeling.",
-    "your brain's error-detection drops significantly after midnight. combined with an AI that doesn't catch its own mistakes, you're now shipping code reviewed by no one who's fully awake.",
+    "past midnight coding = reasoning at 0.05 BAC. your reviewers are sober 💀",
+    "2am brain doesn't catch bugs, it ships them. go to sleep.",
+    "midnight bugs take 3x longer to find tomorrow. log off, bestie.",
+  ],
+
+  // ══ HEALTH (real activity, via the idle clock — not random) ══
+
+  // ── ~25 min continuous: 20-20-20 eye rule ──
+  eyeRest: [
+    "20-20-20, babe: look 20ft away for 20s. your eyeballs are cooked 👀",
+    "when did you last blink? do it. now. for me.",
+    "screen's been in your face 25 min. look at something far away 👀",
+  ],
+
+  // ── ~50 min continuous, no break ──
+  noBreak: [
+    "50 min without moving. your spine filed a complaint 🦴 stand up.",
+    "you're fused to that chair. stretch, bestie.",
+    "no break in nearly an hour. go touch grass, or at least the kitchen 🌱",
+  ],
+
+  // ── 8h+ active today ──
+  longDay: [
+    "8 hours active today. that's a full shift. clock out 🫡",
+    "you've done a whole workday. past this it's for the plot, not the PR.",
+    "8h in. you're not building anymore, you're grinding. log off.",
+  ],
+
+  // ── 7+ consecutive days used ──
+  dayStreak: [
+    "7 days straight. even God rested 🙏 take a day off.",
+    "a full week, no day off. that's not dedication, it's a burnout speedrun.",
+    "7-day streak. impressive. also: stop. rest is a feature, not a bug.",
   ],
 };
 

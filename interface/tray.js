@@ -17,11 +17,13 @@ function createTray(getCats, handlers) {
   return { tray, refresh };
 }
 
-function _buildMenu(cats, { onSettings, onRoast, onToggle, onQuit }) {
+function _buildMenu(cats, { onSettings, onRoast, onToggle, onReplayOnboarding, getQuiet, onToggleQuiet, onQuit }) {
   return Menu.buildFromTemplate([
     { label: '🐱 Roast Cat', enabled: false },
     { type: 'separator' },
+    { label: 'Quiet mode (no roasts, stay still)', type: 'checkbox', checked: !!(getQuiet && getQuiet()), click: onToggleQuiet },
     { label: 'Settings', click: onSettings },
+    { label: 'Run setup again…', click: onReplayOnboarding },
     { type: 'separator' },
     ...cats.map(cat => ({
       label: cat.name,

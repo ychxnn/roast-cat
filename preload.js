@@ -13,4 +13,18 @@ contextBridge.exposeInMainWorld('api', {
   addCat:      ()       => ipcRenderer.invoke('add-cat'),
   removeCat:   catId    => ipcRenderer.invoke('remove-cat', catId),
   manualRoast: catId    => ipcRenderer.invoke('manual-roast', catId),
+  resizeCat:  (id, size)=> ipcRenderer.invoke('resize-cat', { id, size }), // live, no save
+
+  // onboarding / permissions
+  finishOnboarding:        cfg => ipcRenderer.invoke('finish-onboarding', cfg),
+  checkAccessibility:      ()  => ipcRenderer.invoke('check-accessibility'),
+  requestAccessibility:    ()  => ipcRenderer.invoke('request-accessibility'),
+  openAccessibilitySettings:() => ipcRenderer.invoke('open-accessibility-settings'),
+
+  // theme / behavior
+  getPrefs:    ()      => ipcRenderer.invoke('get-prefs'),
+  setTheme:    theme   => ipcRenderer.invoke('set-theme', theme),
+  onTheme:     cb      => ipcRenderer.on('theme', (_, v) => cb(v)),
+  setBehavior: b       => ipcRenderer.invoke('set-behavior', b),
+  onBehavior:  cb      => ipcRenderer.on('behavior', (_, v) => cb(v)),
 });
