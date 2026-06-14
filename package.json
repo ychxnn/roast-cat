@@ -1,0 +1,19 @@
+{
+  "name": "roast-cat",
+  "version": "1.0.0",
+  "description": "A desktop cat that watches your AI CLI sessions and roasts you with documented facts when you're doing something wrong",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "demo": "electron . --demo"
+  },
+  "keywords": ["electron", "desktop-pet", "ai", "cli", "developer-tools", "productivity", "claude-cli", "aider", "codex"],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "electron": "^42.4.0"
+  }
+}

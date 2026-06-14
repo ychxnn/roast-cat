@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Roast Cat — Settings</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;color:#eee;padding:24px;font-size:14px}
+    h1{font-size:20px;font-weight:700;margin-bottom:4px;color:#fff}
+    .subtitle{color:#888;font-size:12px;margin-bottom:28px}
+    .section{background:#16213e;border-radius:14px;padding:20px;margin-bottom:16px}
+    .section-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+
+    .cat-card{
+      background:#0f3460;border-radius:12px;padding:16px;margin-bottom:12px;
+      display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;
+    }
+    .cat-name-input{
+      background:transparent;border:none;border-bottom:1.5px solid #444;
+      color:#fff;font-size:16px;font-weight:600;width:100%;
+      padding:2px 0;outline:none;
+    }
+    .cat-name-input:focus{border-bottom-color:#e94560}
+
+    .row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+    label{font-size:12px;color:#aaa;min-width:70px}
+
+    .color-btns{display:flex;gap:6px}
+    .color-btn{
+      width:24px;height:24px;border-radius:50%;border:2px solid transparent;
+      cursor:pointer;transition:transform .15s,border-color .15s;
+    }
+    .color-btn.selected{border-color:#fff;transform:scale(1.2)}
+    .color-btn[data-color=orange]{background:#f4a261}
+    .color-btn[data-color=black] {background:#2d2d2d}
+    .color-btn[data-color=white] {background:#f0f0f0}
+    .color-btn[data-color=grey]  {background:#9e9e9e}
+    .color-btn[data-color=pink]  {background:#ff9eb5}
+
+    .size-btns{display:flex;gap:6px}
+    .size-btn{
+      padding:3px 10px;border-radius:20px;border:1.5px solid #444;
+      background:transparent;color:#ccc;cursor:pointer;font-size:12px;
+      transition:background .15s,color .15s;
+    }
+    .size-btn.selected{background:#e94560;border-color:#e94560;color:#fff}
+
+    select{
+      background:#0f3460;border:1.5px solid #444;color:#fff;
+      padding:4px 8px;border-radius:8px;font-size:12px;cursor:pointer;
+    }
+    select:focus{outline:none;border-color:#e94560}
+
+    .freq-row{display:flex;align-items:center;gap:8px;margin-top:12px}
+    input[type=range]{accent-color:#e94560;flex:1}
+    .freq-label{font-size:12px;color:#aaa;white-space:nowrap}
+
+    .toggle{
+      position:relative;display:inline-block;width:36px;height:20px;
+    }
+    .toggle input{opacity:0;width:0;height:0}
+    .slider{
+      position:absolute;inset:0;background:#444;border-radius:20px;
+      cursor:pointer;transition:.3s;
+    }
+    .slider:before{
+      content:'';position:absolute;width:14px;height:14px;
+      left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;
+    }
+    input:checked + .slider{background:#e94560}
+    input:checked + .slider:before{transform:translateX(16px)}
+
+    .remove-btn{
+      background:none;border:none;color:#666;cursor:pointer;
+      font-size:18px;padding:4px;border-radius:6px;transition:color .15s;
+      align-self:flex-start;
+    }
+    .remove-btn:hover{color:#e94560}
+
+    .add-btn{
+      width:100%;padding:12px;border-radius:12px;
+      border:2px dashed #333;background:transparent;color:#666;
+      cursor:pointer;font-size:14px;transition:all .15s;
+    }
+    .add-btn:hover{border-color:#e94560;color:#e94560}
+
+    .global-section .row{margin-top:8px}
+
+    footer{margin-top:24px;text-align:center;color:#555;font-size:11px}
+    a{color:#e94560;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .apps-note{
+      background:#0a1628;border-radius:8px;padding:10px 14px;font-size:11px;
+      color:#666;margin-top:10px;line-height:1.6;
+    }
+    .apps-note strong{color:#aaa}
+  </style>
+</head>
+<body>
+  <h1>🐱 Roast Cat</h1>
+  <p class="subtitle">configure your judgemental desktop companions</p>
+
+  <div class="section">
+    <div class="section-title">Your Cats</div>
+    <div id="cat-list"></div>
+    <button class="add-btn" id="add-cat-btn">+ Add another cat</button>
+  </div>
+
+  <div class="section global-section">
+    <div class="section-title">Accessibility (macOS)</div>
+    <p style="color:#aaa;font-size:12px;line-height:1.6">
+      To read your AI CLI sessions and roast you based on your actual prompts, Roast Cat needs
+      <strong style="color:#fff">Accessibility</strong> permission.<br><br>
+      <strong style="color:#fff">System Settings → Privacy &amp; Security → Accessibility</strong>
+      → enable <em>Electron</em> or <em>Roast Cat</em>.<br><br>
+      Without this, the cat still roasts you based on time of day, health facts, and which AI app is in focus.
+    </p>
+    <div class="apps-note">
+      <strong>Monitored apps (when permission granted):</strong><br>
+      Terminal · iTerm2 · Warp — Claude CLI, Aider, Codex CLI, llm, sgpt<br>
+      Chrome · Arc · Safari · Brave — claude.ai, chatgpt.com, grok.x.com, gemini.google.com, perplexity.ai<br>
+      Claude desktop · ChatGPT desktop
+    </div>
+  </div>
+
+  <footer>
+    <a href="https://github.com/yourusername/roast-cat" target="_blank">GitHub</a> ·
+    click a cat to get roasted · drag to move
+  </footer>
+
+  <script>
+  const { api } = window;
+  const APPS = ['any','claude','chatgpt','grok','gemini','codex','perplexity','copilot','claude-cli','aider'];
+  const COLORS = ['orange','black','white','grey','pink'];
+  const SIZES  = ['small','medium','large'];
+
+  let cats = [];
+
+  async function load() {
+    cats = await api.getCats();
+    render();
+  }
+
+  function render() {
+    const list = document.getElementById('cat-list');
+    list.innerHTML = '';
+    for (const cat of cats) {
+      list.appendChild(buildCard(cat));
+    }
+  }
+
+  function buildCard(cat) {
+    const card = document.createElement('div');
+    card.className = 'cat-card';
+    card.dataset.id = cat.id;
+
+    card.innerHTML = `
+      <div>
+        <input class="cat-name-input" type="text" value="${esc(cat.name)}" data-field="name" placeholder="Cat name"/>
+
+        <div class="row">
+          <label>Colour</label>
+          <div class="color-btns">
+            ${COLORS.map(c => `<button class="color-btn${cat.color===c?' selected':''}" data-color="${c}" title="${c}"></button>`).join('')}
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Size</label>
+          <div class="size-btns">
+            ${SIZES.map(s => `<button class="size-btn${cat.size===s?' selected':''}" data-size="${s}">${s}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="row">
+          <label>Watch</label>
+          <select data-field="assignedApp">
+            ${APPS.map(a => `<option value="${a}"${cat.assignedApp===a?' selected':''}>${a==='any'?'any AI app':a}</option>`).join('')}
+          </select>
+        </div>
+
+<div class="row">
+          <label>Enabled</label>
+          <label class="toggle">
+            <input type="checkbox" data-field="enabled" ${cat.enabled?'checked':''}/>
+            <span class="slider"></span>
+          </label>
+          <button style="margin-left:auto;background:#e94560;border:none;color:#fff;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:12px"
+            onclick="roastNow('${cat.id}')">roast me now</button>
+        </div>
+      </div>
+      <button class="remove-btn" onclick="removeCat('${cat.id}')" title="Remove cat">✕</button>
+    `;
+
+    // listeners
+    card.querySelector('[data-field=name]').addEventListener('input', e => update(cat.id, 'name', e.target.value));
+
+    card.querySelectorAll('.color-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        card.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        update(cat.id, 'color', btn.dataset.color);
+      });
+    });
+
+    card.querySelectorAll('.size-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        card.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        update(cat.id, 'size', btn.dataset.size);
+      });
+    });
+
+    card.querySelector('[data-field=assignedApp]').addEventListener('change', e => update(cat.id, 'assignedApp', e.target.value));
+    card.querySelector('[data-field=enabled]').addEventListener('change', e => update(cat.id, 'enabled', e.target.checked));
+
+
+    return card;
+  }
+
+  function update(id, field, value) {
+    const cat = cats.find(c => c.id === id);
+    if (!cat) return;
+    cat[field] = value;
+    api.saveCats(cats);
+  }
+
+  async function removeCat(id) {
+    if (cats.length <= 1) { alert('You need at least one cat.'); return; }
+    cats = cats.filter(c => c.id !== id);
+    await api.removeCat(id);
+    render();
+  }
+
+  async function roastNow(id) { await api.manualRoast(id); }
+
+  document.getElementById('add-cat-btn').addEventListener('click', async () => {
+    const cat = await api.addCat();
+    cats.push(cat);
+    render();
+  });
+
+  function esc(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  load();
+  </script>
+</body>
+</html>
