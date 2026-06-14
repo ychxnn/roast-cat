@@ -4,33 +4,60 @@
   <meta charset="UTF-8"/>
   <title>Roast Cat — Settings</title>
   <style>
+    /* Themeable via CSS vars (set by applyTheme); defaults = pink. See THEME.md */
+    :root{
+      --bg1:#fff0f6; --bg2:#f3e8ff; --panel:#ffffff; --card:#fff5fa;
+      --border:#ffd9e8; --accent:#ff6b9d; --accentDeep:#c2387a;
+      --text:#5a3d5c; --textSoft:#a06b88;
+    }
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#1a1a2e;color:#eee;padding:24px;font-size:14px}
-    h1{font-size:20px;font-weight:700;margin-bottom:4px;color:#fff}
-    .subtitle{color:#888;font-size:12px;margin-bottom:28px}
-    .section{background:#16213e;border-radius:14px;padding:20px;margin-bottom:16px}
-    .section-title{font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+    body{
+      font-family:ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);
+      background-attachment:fixed;
+      color:var(--text);padding:24px;font-size:14px;transition:background .3s,color .3s;
+    }
+    h1{font-size:20px;font-weight:800;margin-bottom:4px;color:var(--accentDeep)}
+    .subtitle{color:var(--textSoft);font-size:12px;margin-bottom:28px}
+    .section{
+      background:var(--panel);border:1.5px solid var(--border);border-radius:16px;
+      padding:20px;margin-bottom:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+    }
+    .section-title{font-size:12px;font-weight:700;color:var(--accentDeep);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+
+    /* theme picker */
+    .theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .theme-opt{
+      border:2px solid var(--border);border-radius:12px;padding:10px 8px;cursor:pointer;
+      text-align:center;transition:.15s;background:var(--card);
+    }
+    .theme-opt.selected{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,.12)}
+    .theme-swatch{height:30px;border-radius:8px;margin-bottom:7px}
+    .theme-name{font-size:12px;font-weight:700;color:var(--text)}
+    .sw-pink{background:linear-gradient(135deg,#ff8fb3,#c2387a)}
+    .sw-demure{background:linear-gradient(135deg,#cdbfe0,#8a73b8)}
+    .sw-catchy{background:linear-gradient(135deg,#ff2d78,#ffd23f)}
+    .sw-mint{background:linear-gradient(135deg,#7fd6b5,#1f9e78)}
 
     .cat-card{
-      background:#0f3460;border-radius:12px;padding:16px;margin-bottom:12px;
+      background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;
       display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;
     }
     .cat-name-input{
-      background:transparent;border:none;border-bottom:1.5px solid #444;
-      color:#fff;font-size:16px;font-weight:600;width:100%;
-      padding:2px 0;outline:none;
+      background:transparent;border:none;border-bottom:1.5px solid var(--border);
+      color:var(--text);font-size:16px;font-weight:600;width:100%;padding:2px 0;outline:none;
     }
-    .cat-name-input:focus{border-bottom-color:#e94560}
+    .cat-name-input:focus{border-bottom-color:var(--accent)}
 
     .row{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
-    label{font-size:12px;color:#aaa;min-width:70px}
+    label{font-size:12px;color:var(--textSoft);min-width:70px}
 
     .color-btns{display:flex;gap:6px}
     .color-btn{
       width:24px;height:24px;border-radius:50%;border:2px solid transparent;
-      cursor:pointer;transition:transform .15s,border-color .15s;
+      cursor:pointer;transition:transform .15s,border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.2);
     }
-    .color-btn.selected{border-color:#fff;transform:scale(1.2)}
+    .color-btn.selected{border-color:var(--accent);transform:scale(1.2)}
     .color-btn[data-color=orange]{background:#f4a261}
     .color-btn[data-color=black] {background:#2d2d2d}
     .color-btn[data-color=white] {background:#f0f0f0}
@@ -39,67 +66,83 @@
 
     .size-btns{display:flex;gap:6px}
     .size-btn{
-      padding:3px 10px;border-radius:20px;border:1.5px solid #444;
-      background:transparent;color:#ccc;cursor:pointer;font-size:12px;
-      transition:background .15s,color .15s;
+      padding:3px 10px;border-radius:20px;border:1.5px solid var(--border);
+      background:transparent;color:var(--textSoft);cursor:pointer;font-size:12px;
+      transition:background .15s,color .15s,border-color .15s;
     }
-    .size-btn.selected{background:#e94560;border-color:#e94560;color:#fff}
+    .size-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    input[type=range].size-range{flex:1;max-width:170px;accent-color:var(--accent);cursor:pointer}
+    .size-val{font-size:11px;color:var(--textSoft);min-width:42px;text-align:right}
 
     select{
-      background:#0f3460;border:1.5px solid #444;color:#fff;
+      background:var(--card);border:1.5px solid var(--border);color:var(--text);
       padding:4px 8px;border-radius:8px;font-size:12px;cursor:pointer;
     }
-    select:focus{outline:none;border-color:#e94560}
+    select:focus{outline:none;border-color:var(--accent)}
 
-    .freq-row{display:flex;align-items:center;gap:8px;margin-top:12px}
-    input[type=range]{accent-color:#e94560;flex:1}
-    .freq-label{font-size:12px;color:#aaa;white-space:nowrap}
-
-    .toggle{
-      position:relative;display:inline-block;width:36px;height:20px;
-    }
+    .toggle{position:relative;display:inline-block;width:36px;height:20px}
     .toggle input{opacity:0;width:0;height:0}
-    .slider{
-      position:absolute;inset:0;background:#444;border-radius:20px;
-      cursor:pointer;transition:.3s;
-    }
-    .slider:before{
-      content:'';position:absolute;width:14px;height:14px;
-      left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s;
-    }
-    input:checked + .slider{background:#e94560}
+    .slider{position:absolute;inset:0;background:var(--border);border-radius:20px;cursor:pointer;transition:.3s}
+    .slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+    input:checked + .slider{background:var(--accent)}
     input:checked + .slider:before{transform:translateX(16px)}
 
+    .roast-now-btn{margin-left:auto;background:var(--accent);border:none;color:#fff;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:12px}
+
     .remove-btn{
-      background:none;border:none;color:#666;cursor:pointer;
-      font-size:18px;padding:4px;border-radius:6px;transition:color .15s;
-      align-self:flex-start;
+      background:none;border:none;color:var(--textSoft);cursor:pointer;
+      font-size:18px;padding:4px;border-radius:6px;transition:color .15s;align-self:flex-start;
     }
-    .remove-btn:hover{color:#e94560}
+    .remove-btn:hover{color:var(--accent)}
 
     .add-btn{
       width:100%;padding:12px;border-radius:12px;
-      border:2px dashed #333;background:transparent;color:#666;
+      border:2px dashed var(--border);background:transparent;color:var(--textSoft);
       cursor:pointer;font-size:14px;transition:all .15s;
     }
-    .add-btn:hover{border-color:#e94560;color:#e94560}
+    .add-btn:hover{border-color:var(--accent);color:var(--accent)}
 
-    .global-section .row{margin-top:8px}
-
-    footer{margin-top:24px;text-align:center;color:#555;font-size:11px}
-    a{color:#e94560;text-decoration:none}
+    footer{margin-top:24px;text-align:center;color:var(--textSoft);font-size:11px}
+    a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
 
     .apps-note{
-      background:#0a1628;border-radius:8px;padding:10px 14px;font-size:11px;
-      color:#666;margin-top:10px;line-height:1.6;
+      background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:11px;
+      color:var(--textSoft);margin-top:10px;line-height:1.6;
     }
-    .apps-note strong{color:#aaa}
+    .apps-note strong{color:var(--accentDeep)}
+    .perm-text{color:var(--textSoft);font-size:12px;line-height:1.6}
+    .perm-text strong{color:var(--accentDeep)}
   </style>
 </head>
 <body>
   <h1>🐱 Roast Cat</h1>
   <p class="subtitle">configure your judgemental desktop companions</p>
+
+  <div class="section">
+    <div class="section-title">Chat theme</div>
+    <div class="theme-grid" id="theme-grid">
+      <div class="theme-opt" data-theme="pink"><div class="theme-swatch sw-pink"></div><div class="theme-name">pink</div></div>
+      <div class="theme-opt" data-theme="demure"><div class="theme-swatch sw-demure"></div><div class="theme-name">demure</div></div>
+      <div class="theme-opt" data-theme="catchy"><div class="theme-swatch sw-catchy"></div><div class="theme-name">catchy</div></div>
+      <div class="theme-opt" data-theme="mint"><div class="theme-swatch sw-mint"></div><div class="theme-name">mint</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Behavior</div>
+    <div class="row">
+      <label>Activity</label>
+      <input type="range" class="size-range" id="activity" min="0" max="100" step="5"/>
+      <span class="size-val" id="activity-val"></span>
+    </div>
+    <div class="row">
+      <label>Quiet mode</label>
+      <label class="toggle"><input type="checkbox" id="quiet"/><span class="slider"></span></label>
+      <span style="font-size:11px;color:var(--textSoft)">no roasts · stays still</span>
+    </div>
+  </div>
 
   <div class="section">
     <div class="section-title">Your Cats</div>
@@ -109,18 +152,16 @@
 
   <div class="section global-section">
     <div class="section-title">Accessibility (macOS)</div>
-    <p style="color:#aaa;font-size:12px;line-height:1.6">
+    <p class="perm-text">
       To read your AI CLI sessions and roast you based on your actual prompts, Roast Cat needs
-      <strong style="color:#fff">Accessibility</strong> permission.<br><br>
-      <strong style="color:#fff">System Settings → Privacy &amp; Security → Accessibility</strong>
+      <strong>Accessibility</strong> permission.<br><br>
+      <strong>System Settings → Privacy &amp; Security → Accessibility</strong>
       → enable <em>Electron</em> or <em>Roast Cat</em>.<br><br>
-      Without this, the cat still roasts you based on time of day, health facts, and which AI app is in focus.
+      Without this, the cat still roasts you on time of day and your real activity (focus time, breaks, late nights).
     </p>
     <div class="apps-note">
-      <strong>Monitored apps (when permission granted):</strong><br>
-      Terminal · iTerm2 · Warp — Claude CLI, Aider, Codex CLI, llm, sgpt<br>
-      Chrome · Arc · Safari · Brave — claude.ai, chatgpt.com, grok.x.com, gemini.google.com, perplexity.ai<br>
-      Claude desktop · ChatGPT desktop
+      <strong>Reads your prompts from:</strong> Terminal &amp; iTerm2 only (for now).<br>
+      Health roasts (overwork, breaks, late nights) work everywhere — they use your activity, not your apps.
     </div>
   </div>
 
@@ -130,92 +171,124 @@
   </footer>
 
   <script>
-  const { api } = window;
+  // NOTE: window.api is a NON-configurable global (contextBridge). Do NOT declare
+  // a top-level `const api` — it throws "already declared" and kills this script.
   const APPS = ['any','claude','chatgpt','grok','gemini','codex','perplexity','copilot','claude-cli','aider'];
   const COLORS = ['orange','black','white','grey','pink'];
-  const SIZES  = ['small','medium','large'];
+  const SIZE_MAP = { small:190, medium:250, large:310 }; // legacy preset → px
+  function sizeVal(s){ return (typeof s === 'number') ? s : (SIZE_MAP[s] || 250); }
+
+  // UI theme tokens — kept in sync with cat.html / onboarding.html
+  const THEMES = {
+    pink:   { bg1:'#fff0f6', bg2:'#f3e8ff', panel:'#ffffff', card:'#fff5fa', border:'#ffd9e8', accent:'#ff6b9d', accentDeep:'#c2387a', text:'#5a3d5c', textSoft:'#a06b88' },
+    demure: { bg1:'#f6f4f9', bg2:'#efeaf2', panel:'#ffffff', card:'#faf9fc', border:'#e6e0ee', accent:'#b39ddb', accentDeep:'#8a73b8', text:'#5d5566', textSoft:'#9a90a8' },
+    catchy: { bg1:'#2a1330', bg2:'#3a1840', panel:'#371d40', card:'#43244d', border:'#5a2d55', accent:'#ff2d78', accentDeep:'#ff7fae', text:'#ffe6f1', textSoft:'#d59ab8' },
+    mint:   { bg1:'#effaf4', bg2:'#e4f5ef', panel:'#ffffff', card:'#f3fbf7', border:'#cdeee0', accent:'#34c79a', accentDeep:'#1f9e78', text:'#3f5a50', textSoft:'#7fa394' },
+  };
+  function applyTheme(name){
+    const t = THEMES[name] || THEMES.pink;
+    const r = document.documentElement.style;
+    for (const k in t) r.setProperty('--'+k, t[k]);
+    document.querySelectorAll('.theme-opt').forEach(o => o.classList.toggle('selected', o.dataset.theme===name));
+  }
 
   let cats = [];
 
   async function load() {
-    cats = await api.getCats();
+    const prefs = await window.api.getPrefs();
+    applyTheme(prefs && prefs.theme ? prefs.theme : 'pink');
+    const act = document.getElementById('activity'), actVal = document.getElementById('activity-val');
+    act.value = (prefs && typeof prefs.activity === 'number') ? prefs.activity : 60;
+    actVal.textContent = act.value;
+    document.getElementById('quiet').checked = !!(prefs && prefs.quiet);
+    cats = await window.api.getCats();
     render();
   }
+
+  // app-wide behavior controls
+  (() => {
+    const act = document.getElementById('activity'), actVal = document.getElementById('activity-val');
+    act.addEventListener('input', () => { actVal.textContent = act.value; });
+    act.addEventListener('change', () => window.api.setBehavior({ activity: +act.value }));
+    document.getElementById('quiet').addEventListener('change', e => window.api.setBehavior({ quiet: e.target.checked }));
+  })();
+
+  document.querySelectorAll('.theme-opt').forEach(o => o.addEventListener('click', () => {
+    applyTheme(o.dataset.theme);
+    window.api.setTheme(o.dataset.theme); // saves + live-updates every cat window
+  }));
 
   function render() {
     const list = document.getElementById('cat-list');
     list.innerHTML = '';
-    for (const cat of cats) {
-      list.appendChild(buildCard(cat));
-    }
+    for (const cat of cats) list.appendChild(buildCard(cat));
   }
 
   function buildCard(cat) {
     const card = document.createElement('div');
     card.className = 'cat-card';
     card.dataset.id = cat.id;
-
     card.innerHTML = `
       <div>
         <input class="cat-name-input" type="text" value="${esc(cat.name)}" data-field="name" placeholder="Cat name"/>
-
         <div class="row">
           <label>Colour</label>
           <div class="color-btns">
             ${COLORS.map(c => `<button class="color-btn${cat.color===c?' selected':''}" data-color="${c}" title="${c}"></button>`).join('')}
           </div>
         </div>
-
         <div class="row">
           <label>Size</label>
+          <input type="range" class="size-range" min="120" max="340" step="2" value="${sizeVal(cat.size)}" data-field="size"/>
+          <span class="size-val">${sizeVal(cat.size)}px</span>
+        </div>
+        <div class="row">
+          <label>Movement</label>
           <div class="size-btns">
-            ${SIZES.map(s => `<button class="size-btn${cat.size===s?' selected':''}" data-size="${s}">${s}</button>`).join('')}
+            <button class="size-btn${cat.roam!=='static'?' selected':''}" data-roam="free">zoomies</button>
+            <button class="size-btn${cat.roam==='static'?' selected':''}" data-roam="static">couch potato 🛋️</button>
           </div>
         </div>
-
         <div class="row">
           <label>Watch</label>
           <select data-field="assignedApp">
             ${APPS.map(a => `<option value="${a}"${cat.assignedApp===a?' selected':''}>${a==='any'?'any AI app':a}</option>`).join('')}
           </select>
         </div>
-
-<div class="row">
+        <div class="row">
           <label>Enabled</label>
           <label class="toggle">
             <input type="checkbox" data-field="enabled" ${cat.enabled?'checked':''}/>
             <span class="slider"></span>
           </label>
-          <button style="margin-left:auto;background:#e94560;border:none;color:#fff;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:12px"
-            onclick="roastNow('${cat.id}')">roast me now</button>
+          <button class="roast-now-btn" onclick="roastNow('${cat.id}')">roast me now</button>
         </div>
       </div>
       <button class="remove-btn" onclick="removeCat('${cat.id}')" title="Remove cat">✕</button>
     `;
 
-    // listeners
     card.querySelector('[data-field=name]').addEventListener('input', e => update(cat.id, 'name', e.target.value));
-
-    card.querySelectorAll('.color-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        card.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        update(cat.id, 'color', btn.dataset.color);
-      });
+    card.querySelectorAll('.color-btn').forEach(btn => btn.addEventListener('click', () => {
+      card.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      update(cat.id, 'color', btn.dataset.color);
+    }));
+    const range = card.querySelector('[data-field=size]');
+    const valEl = card.querySelector('.size-val');
+    range.addEventListener('input', e => {        // live drag: resize now, don't touch disk
+      const v = +e.target.value;
+      valEl.textContent = v + 'px';
+      cat.size = v;
+      window.api.resizeCat(cat.id, v);
     });
-
-    card.querySelectorAll('.size-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        card.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        update(cat.id, 'size', btn.dataset.size);
-      });
-    });
-
+    range.addEventListener('change', () => window.api.saveCats(cats)); // persist on release
+    card.querySelectorAll('[data-roam]').forEach(btn => btn.addEventListener('click', () => {
+      card.querySelectorAll('[data-roam]').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      update(cat.id, 'roam', btn.dataset.roam);
+    }));
     card.querySelector('[data-field=assignedApp]').addEventListener('change', e => update(cat.id, 'assignedApp', e.target.value));
     card.querySelector('[data-field=enabled]').addEventListener('change', e => update(cat.id, 'enabled', e.target.checked));
-
-
     return card;
   }
 
@@ -223,20 +296,20 @@
     const cat = cats.find(c => c.id === id);
     if (!cat) return;
     cat[field] = value;
-    api.saveCats(cats);
+    window.api.saveCats(cats);
   }
 
   async function removeCat(id) {
     if (cats.length <= 1) { alert('You need at least one cat.'); return; }
     cats = cats.filter(c => c.id !== id);
-    await api.removeCat(id);
+    await window.api.removeCat(id);
     render();
   }
 
-  async function roastNow(id) { await api.manualRoast(id); }
+  async function roastNow(id) { await window.api.manualRoast(id); }
 
   document.getElementById('add-cat-btn').addEventListener('click', async () => {
-    const cat = await api.addCat();
+    const cat = await window.api.addCat();
     cats.push(cat);
     render();
   });

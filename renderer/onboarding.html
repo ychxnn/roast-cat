@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>Welcome to Roast Cat</title>
+  <style>
+    /* Themeable via CSS vars (applyTheme); defaults = pink. Matches settings.html */
+    :root{
+      --bg1:#fff0f6; --bg2:#f3e8ff; --card:#ffffff; --border:#f0c0d8;
+      --accent:#ff6b9d; --accentDeep:#c2387a; --text:#5a3d5c; --textSoft:#7a5a70;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:ui-rounded,'SF Pro Rounded',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:linear-gradient(160deg,var(--bg1) 0%,var(--bg2) 100%);
+      color:var(--text);display:flex;flex-direction:column;
+      overflow:hidden;user-select:none;-webkit-user-select:none;transition:background .3s,color .3s;
+    }
+
+    .progress{display:flex;justify-content:center;gap:8px;padding:22px 0 6px}
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:.25s}
+    .dot.active{background:var(--accent);transform:scale(1.35)}
+    .dot.done{background:var(--accentDeep)}
+
+    .steps{flex:1;position:relative;overflow:hidden}
+    .step{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;padding:8px 44px 0;
+      opacity:0;transform:translateX(24px);pointer-events:none;
+      transition:opacity .3s,transform .3s;
+    }
+    .step.active{opacity:1;transform:none;pointer-events:auto}
+
+    .emoji{font-size:54px;margin-bottom:10px;line-height:1}
+    h1{font-size:26px;font-weight:800;color:var(--accentDeep);margin-bottom:10px}
+    h2{font-size:21px;font-weight:800;color:var(--accentDeep);margin-bottom:8px}
+    p.lead{font-size:14px;line-height:1.65;color:var(--textSoft);max-width:430px}
+    p.lead strong{color:var(--accentDeep)}
+
+    .feature-list{list-style:none;text-align:left;max-width:400px;margin-top:6px}
+    .feature-list li{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.5;color:var(--textSoft);margin:13px 0}
+    .feature-list .fi{font-size:20px;line-height:1.2;flex-shrink:0}
+    .feature-list b{color:var(--text)}
+
+    .preview-cat{width:140px;height:140px;margin-bottom:4px}
+    .preview-cat svg{width:100%;height:100%;overflow:visible}
+
+    .field{margin:9px 0;width:100%;max-width:360px;text-align:left}
+    .field-label{font-size:12px;font-weight:700;color:var(--textSoft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+    .name-input{
+      width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:12px;
+      color:var(--text);font-size:16px;font-weight:600;padding:10px 14px;outline:none;
+    }
+    .name-input:focus{border-color:var(--accent)}
+
+    .swatches{display:flex;gap:10px;justify-content:center}
+    .swatch{
+      width:32px;height:32px;border-radius:50%;border:3px solid transparent;
+      cursor:pointer;transition:transform .15s,border-color .15s;box-shadow:0 1px 4px rgba(0,0,0,.2);
+    }
+    .swatch.sel{border-color:var(--accent);transform:scale(1.18)}
+    .swatch[data-c=orange]{background:#f4a261}
+    .swatch[data-c=black]{background:#2d2d2d}
+    .swatch[data-c=white]{background:#f0f0f0}
+    .swatch[data-c=grey]{background:#9e9e9e}
+    .swatch[data-c=pink]{background:#ff9eb5}
+
+    .pills{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+    .pill{
+      padding:7px 16px;border-radius:22px;border:1.5px solid var(--border);
+      background:var(--card);color:var(--textSoft);cursor:pointer;font-size:13px;font-weight:600;transition:.15s;
+    }
+    .pill.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+
+    /* theme picker */
+    .theme-row{display:flex;gap:8px;justify-content:space-between}
+    .theme-opt{flex:1;border:2px solid var(--border);border-radius:11px;padding:7px 4px;cursor:pointer;text-align:center;background:var(--card);transition:.15s}
+    .theme-opt.sel{border-color:var(--accent);transform:translateY(-2px)}
+    .theme-sw{height:22px;border-radius:6px;margin-bottom:5px}
+    .theme-nm{font-size:11px;font-weight:700;color:var(--text)}
+    .sw-pink{background:linear-gradient(135deg,#ff8fb3,#c2387a)}
+    .sw-demure{background:linear-gradient(135deg,#cdbfe0,#8a73b8)}
+    .sw-catchy{background:linear-gradient(135deg,#ff2d78,#ffd23f)}
+    .sw-mint{background:linear-gradient(135deg,#7fd6b5,#1f9e78)}
+
+    .app-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;max-width:400px;margin-top:4px}
+    .app-grid .pill{justify-self:stretch;text-align:center}
+
+    .perm-card{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px 18px;max-width:430px;text-align:left;font-size:13px;line-height:1.6;color:var(--textSoft);margin-top:4px}
+    .perm-card b{color:var(--accentDeep)}
+    .perm-status{margin-top:10px;font-size:12.5px;font-weight:700}
+    .perm-status.ok{color:#2e9e6b}
+    .perm-status.pending{color:var(--textSoft)}
+    .link-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:12.5px;text-decoration:underline;padding:0;margin-top:10px}
+
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 30px 26px}
+    .btn{border:none;border-radius:24px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
+    .btn-primary{background:var(--accent);color:#fff;box-shadow:0 6px 16px rgba(0,0,0,.18)}
+    .btn-primary:hover{filter:brightness(1.05)}
+    .btn-ghost{background:transparent;color:var(--textSoft)}
+    .btn-ghost:hover{color:var(--accent)}
+    .btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+    .spacer{flex:1}
+  </style>
+</head>
+<body>
+
+  <div class="progress" id="progress"></div>
+
+  <div class="steps" id="steps">
+
+    <section class="step active" data-step="0">
+      <div class="emoji">🐱🍬</div>
+      <h1>Meet your Roast Cat</h1>
+      <p class="lead">
+        A tiny cat lives on your desktop and keeps an eye on your coding sessions.
+        When you slip into a bad habit, it roasts you — with <strong>receipts</strong>,
+        not vibes. Let's set yours up. Takes about 30 seconds.
+      </p>
+    </section>
+
+    <section class="step" data-step="1">
+      <div class="emoji">✨</div>
+      <h2>How it works</h2>
+      <ul class="feature-list">
+        <li><span class="fi">🧠</span><span><b>Catches bad habits.</b> Context rot, error loops, panic-prompting, debugging with no context, unreviewed giant outputs.</span></li>
+        <li><span class="fi">🫶</span><span><b>Watches your health.</b> Knows when you're actually working — and roasts you for no breaks, long days, 2am sessions.</span></li>
+        <li><span class="fi">😼</span><span><b>It has moods.</b> It loafs, plays, naps, side-eyes you — and roasts in a style that matches the mood.</span></li>
+        <li><span class="fi">🖱️</span><span><b>Click it</b> for an instant roast, <b>drag it</b> anywhere.</span></li>
+      </ul>
+    </section>
+
+    <section class="step" data-step="2">
+      <h2>Make it yours</h2>
+      <div class="preview-cat" id="preview"></div>
+      <div class="field">
+        <div class="field-label">Name</div>
+        <input class="name-input" id="catName" type="text" maxlength="24" placeholder="Roast Cat" value="Roast Cat"/>
+      </div>
+      <div class="field">
+        <div class="field-label">Cat colour</div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+      <div class="field">
+        <div class="field-label">Chat theme</div>
+        <div class="theme-row" id="themes"></div>
+      </div>
+      <div class="field">
+        <div class="field-label">Size</div>
+        <div class="pills" id="sizes"></div>
+      </div>
+    </section>
+
+    <section class="step" data-step="3">
+      <div class="emoji">👀</div>
+      <h2>What do you use?</h2>
+      <p class="lead">Pick the AI tool you code with most. You can change this anytime in Settings.</p>
+      <div class="app-grid" id="apps"></div>
+    </section>
+
+    <section class="step" data-step="4">
+      <div class="emoji">🔐</div>
+      <h2>One last thing</h2>
+      <p class="lead">To roast you on your <strong>actual prompts</strong>, Roast Cat needs macOS
+        <strong>Accessibility</strong> permission to read your terminal's text.</p>
+      <div class="perm-card">
+        Click <b>Grant permission</b> and macOS will ask you to allow
+        <b>Electron</b> (or <b>Roast Cat</b>) under <b>Privacy &amp; Security → Accessibility</b>.
+        <div class="perm-status pending" id="permStatus">Not granted yet</div>
+        <button class="link-btn" id="openPrefs">Open System Settings manually</button>
+      </div>
+      <p class="lead" style="margin-top:14px;font-size:12.5px">
+        Prefer not to? Skip it — the health roasts (breaks, long days, late nights) work anyway.
+      </p>
+    </section>
+
+    <section class="step" data-step="5">
+      <div class="emoji">🎉</div>
+      <h1>You're all set!</h1>
+      <p class="lead">Your cat is about to appear, bottom-right. <strong>Click it anytime</strong> for a
+        roast, or use the 🐱 menu-bar icon. Now go write some clean code.</p>
+    </section>
+
+  </div>
+
+  <div class="nav">
+    <button class="btn btn-ghost" id="back">Back</button>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost" id="skip">Skip</button>
+    <button class="btn btn-primary" id="next">Next</button>
+  </div>
+
+  <script>
+  // window.api is a NON-configurable global — never declare a top-level `const api`.
+  const COLORS = {
+    orange:{body:'#f4a261',tummy:'#fff3e0',ear:'#ffb7c5',accent:'#e07b39',eye:'#1a1a2e',nose:'#ff6b9d'},
+    black: {body:'#2d2d2d',tummy:'#4a4a4a',ear:'#ff69b4',accent:'#111',   eye:'#fff',   nose:'#ff6b9d'},
+    white: {body:'#f0f0f0',tummy:'#ffffff',ear:'#ffb7c5',accent:'#ccc',   eye:'#1a1a2e',nose:'#ff6b9d'},
+    grey:  {body:'#9e9e9e',tummy:'#e0e0e0',ear:'#ffb7c5',accent:'#757575',eye:'#1a1a2e',nose:'#ff6b9d'},
+    pink:  {body:'#ff9eb5',tummy:'#ffd6e0',ear:'#ff6b9d',accent:'#e91e8c',eye:'#1a1a2e',nose:'#9c27b0'},
+  };
+  const SIZES = ['small','medium','large'];
+  const APPS = [
+    ['any','any AI app'],['claude','Claude'],['chatgpt','ChatGPT'],
+    ['gemini','Gemini'],['grok','Grok'],['perplexity','Perplexity'],
+    ['claude-cli','Claude CLI'],['codex','Codex'],['aider','Aider'],
+  ];
+  const THEMES = {
+    pink:   { bg1:'#fff0f6', bg2:'#f3e8ff', card:'#ffffff', border:'#f0c0d8', accent:'#ff6b9d', accentDeep:'#c2387a', text:'#5a3d5c', textSoft:'#7a5a70' },
+    demure: { bg1:'#f6f4f9', bg2:'#efeaf2', card:'#ffffff', border:'#e6e0ee', accent:'#b39ddb', accentDeep:'#8a73b8', text:'#5d5566', textSoft:'#8a8194' },
+    catchy: { bg1:'#2a1330', bg2:'#3a1840', card:'#43244d', border:'#5a2d55', accent:'#ff2d78', accentDeep:'#ff7fae', text:'#ffe6f1', textSoft:'#d59ab8' },
+    mint:   { bg1:'#effaf4', bg2:'#e4f5ef', card:'#ffffff', border:'#cdeee0', accent:'#34c79a', accentDeep:'#1f9e78', text:'#3f5a50', textSoft:'#6f9485' },
+  };
+  const THEME_KEYS = ['pink','demure','catchy','mint'];
+
+  const cfg = { name:'Roast Cat', color:'orange', size:'medium', assignedApp:'any' };
+  const TOTAL = 6;
+  let step = 0;
+
+  function applyTheme(name){
+    const t = THEMES[name] || THEMES.pink;
+    const r = document.documentElement.style;
+    for (const k in t) r.setProperty('--'+k, t[k]);
+    document.querySelectorAll('#themes .theme-opt').forEach(o => o.classList.toggle('sel', o.dataset.t===name));
+  }
+
+  function catSVG(c){
+    return `<svg viewBox="0 0 120 112" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="86" rx="30" ry="22" fill="${c.body}"/>
+      <ellipse cx="60" cy="90" rx="16" ry="14" fill="${c.tummy}"/>
+      <circle cx="60" cy="48" r="27" fill="${c.body}"/>
+      <polygon points="34,33 25,9 47,25" fill="${c.body}"/><polygon points="35,31 29,13 45,24" fill="${c.ear}"/>
+      <polygon points="86,33 95,9 73,25" fill="${c.body}"/><polygon points="85,31 91,13 75,24" fill="${c.ear}"/>
+      <path d="M60 14 Q48 6 47 14 Q48 22 60 14 Z" fill="#ff4f8f" stroke="#fff" stroke-width="1"/>
+      <path d="M60 14 Q72 6 73 14 Q72 22 60 14 Z" fill="#ff4f8f" stroke="#fff" stroke-width="1"/>
+      <circle cx="60" cy="14" r="3" fill="#e8366f"/>
+      <ellipse cx="43" cy="55" rx="6.5" ry="4" fill="#ffb7c5" opacity=".5"/>
+      <ellipse cx="77" cy="55" rx="6.5" ry="4" fill="#ffb7c5" opacity=".5"/>
+      <ellipse cx="50" cy="46" rx="5.5" ry="6.5" fill="${c.eye}"/><circle cx="52" cy="44" r="1.8" fill="#fff"/>
+      <ellipse cx="70" cy="46" rx="5.5" ry="6.5" fill="${c.eye}"/><circle cx="72" cy="44" r="1.8" fill="#fff"/>
+      <path d="M57 56 L60 59 L63 56 Z" fill="${c.nose}"/>
+      <path d="M54 62 Q60 67 66 62" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>`;
+  }
+  function renderPreview(){ document.getElementById('preview').innerHTML = catSVG(COLORS[cfg.color]); }
+
+  function buildSwatches(){
+    const el = document.getElementById('swatches');
+    el.innerHTML = Object.keys(COLORS).map(k => `<div class="swatch${cfg.color===k?' sel':''}" data-c="${k}" title="${k}"></div>`).join('');
+    el.querySelectorAll('.swatch').forEach(s => s.onclick = () => {
+      cfg.color = s.dataset.c;
+      el.querySelectorAll('.swatch').forEach(x => x.classList.toggle('sel', x===s));
+      renderPreview();
+    });
+  }
+  function buildSizes(){
+    const el = document.getElementById('sizes');
+    el.innerHTML = SIZES.map(s => `<div class="pill${cfg.size===s?' sel':''}" data-s="${s}">${s}</div>`).join('');
+    el.querySelectorAll('.pill').forEach(p => p.onclick = () => {
+      cfg.size = p.dataset.s;
+      el.querySelectorAll('.pill').forEach(x => x.classList.toggle('sel', x===p));
+    });
+  }
+  function buildApps(){
+    const el = document.getElementById('apps');
+    el.innerHTML = APPS.map(([v,label]) => `<div class="pill${cfg.assignedApp===v?' sel':''}" data-a="${v}">${label}</div>`).join('');
+    el.querySelectorAll('.pill').forEach(p => p.onclick = () => {
+      cfg.assignedApp = p.dataset.a;
+      el.querySelectorAll('.pill').forEach(x => x.classList.toggle('sel', x===p));
+    });
+  }
+  function buildThemes(){
+    const el = document.getElementById('themes');
+    el.innerHTML = THEME_KEYS.map(k => `<div class="theme-opt" data-t="${k}"><div class="theme-sw sw-${k}"></div><div class="theme-nm">${k}</div></div>`).join('');
+    el.querySelectorAll('.theme-opt').forEach(o => o.onclick = () => {
+      applyTheme(o.dataset.t);
+      window.api.setTheme(o.dataset.t); // persist app-wide + live-update the cat
+    });
+  }
+  document.getElementById('catName').addEventListener('input', e => { cfg.name = e.target.value.trim() || 'Roast Cat'; });
+
+  const progressEl = document.getElementById('progress');
+  progressEl.innerHTML = Array.from({length:TOTAL}, (_,i)=>`<div class="dot" data-i="${i}"></div>`).join('');
+
+  function show(n){
+    step = Math.max(0, Math.min(TOTAL-1, n));
+    document.querySelectorAll('.step').forEach(s => s.classList.toggle('active', +s.dataset.step === step));
+    progressEl.querySelectorAll('.dot').forEach((d,i) => { d.classList.toggle('active', i===step); d.classList.toggle('done', i<step); });
+    document.getElementById('back').style.visibility = step===0 ? 'hidden' : 'visible';
+    document.getElementById('skip').style.display = step>=TOTAL-1 ? 'none' : '';
+    document.getElementById('next').textContent = step===TOTAL-1 ? "Let's go!" : 'Next';
+    if (step===4) refreshPerm();
+  }
+
+  async function refreshPerm(){
+    const ok = await window.api.checkAccessibility();
+    const el = document.getElementById('permStatus');
+    el.textContent = ok ? '✓ Permission granted' : 'Not granted yet';
+    el.className = 'perm-status ' + (ok ? 'ok' : 'pending');
+  }
+  document.getElementById('openPrefs').onclick = () => window.api.openAccessibilitySettings();
+
+  document.getElementById('back').onclick = () => show(step-1);
+  document.getElementById('next').onclick = async () => {
+    if (step===4) { await window.api.requestAccessibility(); await refreshPerm(); }
+    if (step===TOTAL-1) { finish(); return; }
+    show(step+1);
+  };
+  document.getElementById('skip').onclick = finish;
+
+  async function finish(){
+    document.getElementById('next').disabled = true;
+    document.getElementById('skip').disabled = true;
+    await window.api.finishOnboarding(cfg);
+  }
+
+  // init
+  (async () => {
+    let theme = 'pink';
+    try { const p = await window.api.getPrefs(); if (p && p.theme) theme = p.theme; } catch {}
+    buildSwatches(); buildSizes(); buildApps(); buildThemes(); renderPreview();
+    applyTheme(theme);
+    show(0);
+  })();
+  </script>
+</body>
+</html>
+</content>
