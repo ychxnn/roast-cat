@@ -5,7 +5,7 @@ PRs welcome. Here's what to know.
 ## Setup
 
 ```bash
-git clone https://github.com/yourusername/roast-cat
+git clone https://github.com/ychxnn/roast-cat
 cd roast-cat
 npm install
 npm start

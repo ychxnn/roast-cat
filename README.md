@@ -19,7 +19,7 @@ Cycles through all roast triggers so you can see the cat in action without an ac
 ## Install
 
 ```bash
-git clone https://github.com/yourusername/roast-cat
+git clone https://github.com/ychxnn/roast-cat
 cd roast-cat
 npm install
 npm start
