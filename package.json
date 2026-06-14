@@ -6,7 +6,8 @@
   "scripts": {
     "start": "electron .",
     "demo": "electron . --demo",
-    "build": "electron-packager . RoastCat --platform=darwin --out=dist --overwrite",
+    "build": "electron-packager . RoastCat --platform=darwin --arch=arm64 --out=dist --overwrite",
+    "build:intel": "electron-packager . RoastCat --platform=darwin --arch=x64 --out=dist --overwrite",
     "install-app": "cp -r dist/RoastCat-darwin-*/RoastCat.app /Applications/"
   },
   "keywords": [

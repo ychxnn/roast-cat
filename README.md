@@ -108,8 +108,15 @@ The cat appears on your screen. Drag it anywhere. Grant Accessibility permission
 To run Roast Cat as a proper macOS app that lives in your status bar and survives terminal closes:
 
 1. Build the `.app` bundle
+
+   **Apple Silicon (M1/M2/M3/M4)**
    ```bash
    npm run build
+   ```
+
+   **Intel Mac**
+   ```bash
+   npm run build:intel
    ```
 
 2. Move it to Applications
@@ -120,8 +127,6 @@ To run Roast Cat as a proper macOS app that lives in your status bar and survive
 3. Launch it from Spotlight (`Cmd+Space` → type `RoastCat`) — the 🐱 icon appears in your menu bar.
 
 4. **Auto-start on login:** System Settings → General → Login Items & Extensions → `+` → select `/Applications/RoastCat.app`
-
-> Requires macOS on Apple Silicon (M1/M2/M3). Intel Mac users: edit the `build` script in `package.json` and add `--arch=x64`.
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
