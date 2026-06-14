@@ -1,57 +1,127 @@
-# Roast Cat
+<div align="center">
 
-A desktop cat that watches your AI CLI sessions and roasts you — with documented facts — when it catches you doing something wrong.
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![CI][ci-shield]][ci-url]
 
-> The AI can't tell you your context window is rotting. The cat can and will.
+<br />
 
-[![CI](https://github.com/ychxnn/roast-cat/actions/workflows/ci.yml/badge.svg)](https://github.com/ychxnn/roast-cat/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Node >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+# 🐱 Roast Cat
+
+**A desktop cat that sits on your screen, watches your AI CLI sessions, and roasts you — with documented facts — when it catches you doing something wrong.**
+
+*The AI can't tell you your context window is rotting. The cat can and will.*
+
+<br />
+
+[View Demo](#demo) · [Report Bug](https://github.com/ychxnn/roast-cat/issues) · [Request Feature](https://github.com/ychxnn/roast-cat/issues)
+
+</div>
 
 ---
 
 ## Table of Contents
 
-- [Install](#install)
-- [Run the Demo](#run-the-demo)
-- [Supported Tools](#supported-tools)
-- [Roast Triggers](#roast-triggers)
-- [Cat Emotions](#cat-emotions)
-- [Why Each Roast is Justified](#why-each-roast-is-justified)
-- [Configure Cats](#configure-cats)
-- [Grant macOS Permissions](#grant-macos-permissions)
-- [Privacy](#privacy)
+- [About The Project](#about-the-project)
+- [Built With](#built-with)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+  - [Demo Mode](#demo-mode)
+  - [Supported Tools](#supported-tools)
+  - [Roast Triggers](#roast-triggers)
+  - [Cat Emotions](#cat-emotions)
+  - [Configure Cats](#configure-cats)
+  - [Grant macOS Permissions](#grant-macos-permissions)
 - [Architecture](#architecture)
-- [Extend Roasts](#extend-roasts)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+- [Acknowledgments](#acknowledgments)
 
 ---
 
-## Install
+## About The Project
 
-```bash
-git clone https://github.com/ychxnn/roast-cat
-cd roast-cat
-npm install
-npm start
-```
+Most developer tools tell you what went wrong *after* the fact. Roast Cat tells you what you're doing wrong *as you do it* — by watching your AI CLI sessions in real time.
 
-Requires [Node.js](https://nodejs.org) v18+.
+It detects real, documented failure patterns:
+
+- **Context rot** — your 90-minute Claude session has degraded to the point the model forgot your first 20 messages
+- **Error loops** — you've pasted the same traceback 3 times and the AI still doesn't have a diagnosis
+- **Panic prompting** — you sent 4 prompts in 30 seconds and now your context is full of noise
+- **Post-output silence** — the AI gave you 200 lines and you haven't questioned any of it
+
+Every roast has a source. Nothing fires on a random timer.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ---
 
-## Run the Demo
+## Built With
+
+- [Electron](https://www.electronjs.org/) — cross-platform desktop shell
+- [Node.js](https://nodejs.org/) — runtime
+- AppleScript — macOS terminal buffer access (for session reading)
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) v18 or higher
+- npm (bundled with Node)
+- macOS (required for AI session reading; time-based triggers work on all platforms)
+
+### Installation
+
+1. Clone the repo
+   ```bash
+   git clone https://github.com/ychxnn/roast-cat.git
+   cd roast-cat
+   ```
+
+2. Install dependencies
+   ```bash
+   npm install
+   ```
+
+3. Run
+   ```bash
+   npm start
+   ```
+
+The cat appears on your screen. Drag it anywhere. Grant Accessibility permission (see below) to enable session monitoring.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+## Usage
+
+### Demo Mode
+
+See all roast triggers in action without an active AI session:
 
 ```bash
 npm run demo
 ```
 
-Cycles through all roast triggers so you can see the cat in action without an active AI session.
+Cycles through all 9 triggers with a 10-second pause between each.
 
 ---
 
-## Supported Tools
+### Supported Tools
 
-The cat watches CLI tools running in Terminal, iTerm2, or Warp:
+The cat reads the terminal buffer from Terminal, iTerm2, and Warp:
 
 | Tool | Detected by |
 |------|-------------|
@@ -59,81 +129,76 @@ The cat watches CLI tools running in Terminal, iTerm2, or Warp:
 | Aider | terminal buffer content |
 | OpenAI Codex CLI | terminal buffer content |
 | `llm`, `sgpt` | terminal buffer content |
-| Any tool matching `Human:` / `Assistant:` prompt format | terminal buffer content |
+| Any tool with `Human:` / `Assistant:` format | terminal buffer content |
 
-**macOS only for session reading.** On other platforms, time-based triggers still work.
+> macOS only for session reading. Time-based triggers (midnight, weekend overwork) work on all platforms.
 
 ---
 
-## Roast Triggers
+### Roast Triggers
 
-The cat never roasts you on a timer. Every roast has a specific, documented reason.
+Every roast requires specific, observable evidence. No random-timer roasting.
 
 | Trigger | Evidence required | Fires |
-|---------|-----------------|-------|
-| **Context rot** | Session running 60 / 90 / 120 min | Once each milestone per session |
-| **Cognitive wall** | 90 min continuous focus | Once per session |
-| **Error loop** | Same error signature appears 3+ times | Per new loop (8 min cooldown) |
-| **Panic prompting** | 4+ prompts in under 60 seconds | Per incident (10 min cooldown) |
-| **No context prompt** | "fix this" / "debug" / "doesn't work" with no error text or code nearby | Per incident (15 min cooldown) |
-| **Post-output silence** | 60+ new lines from AI, then no follow-up for 2 min | Per large output (20 min cooldown) |
+|---------|-------------------|-------|
+| **Context rot** | Session running 60 / 90 / 120 min | Once per milestone |
+| **Cognitive wall** | 90 min of continuous focus | Once per session |
+| **Error loop** | Same error signature 3+ times | Per loop (8 min cooldown) |
+| **Panic prompting** | 4+ prompts in under 60 sec | Per incident (10 min cooldown) |
+| **No context prompt** | "fix this" / "debug" with no error or code nearby | Per incident (15 min cooldown) |
+| **Post-output silence** | 60+ new AI lines, then silence for 2 min | Per output (20 min cooldown) |
 | **Weekend overwork** | Saturday/Sunday + session > 2 hours | Once per day |
-| **After midnight** | Active session detected after 12am | At most every 45 min |
+| **After midnight** | Active session after 12am | Every 45 min max |
+
+**Why each roast is justified:**
+
+- **Context rot** — transformer attention degrades as context fills; the "middle token problem" is documented in LLM research
+- **Cognitive wall** — cognitive load studies show performance degrades measurably past 90 min of sustained focus
+- **Error loop** — the AI has no new information when you paste the same error again
+- **Panic prompting** — rapid-fire prompts fill context with low-signal turns, degrading output quality
+- **No context prompt** — a debugging prompt without error/code context produces a confidently wrong answer
+- **Post-output silence** — 16 of 18 AI-code production failures in 2025 involved unreviewed large outputs
+- **Weekend overwork** — burnout research links this to reduced output the following Monday–Tuesday
+- **After midnight** — sleep deprivation at this hour impairs reasoning at roughly 0.05 BAC
 
 ---
 
-## Cat Emotions
+### Cat Emotions
 
-| Face | When |
-|------|------|
+| Face | Triggered by |
+|------|-------------|
 | 😺 idle | Default |
-| 😸 happy | — |
-| 😾 angry | Error loop, context rot |
-| 😱 shocked | Context rot, panic prompting |
-| 😒 bored | Cognitive wall, no context, weekend overwork |
+| 😾 angry | Error loop, context rot (90+ min) |
+| 😱 shocked | Context rot (60 min), panic prompting |
+| 😒 bored | Cognitive wall, no-context prompt, weekend overwork |
 | 😏 smug | Post-output silence |
 | 😴 sleep | After midnight |
 
 ---
 
-## Why Each Roast is Justified
+### Configure Cats
 
-- **Context rot** — transformer attention degrades as context fills; the "middle token problem" is documented in LLM research
-- **Cognitive wall** — cognitive load studies consistently show performance degrades past 90 min of sustained focus
-- **Error loop** — the AI has no new information when you paste the same error again; the approach is wrong, not the prompt
-- **Panic prompting** — rapid-fire prompts fill context with low-signal turns, measurably degrading output quality
-- **No context prompt** — a debugging prompt without error/code context will get a confidently wrong answer
-- **Post-output silence** — 16 of 18 AI-code production failures studied in 2025 involved unreviewed large outputs
-- **Weekend overwork** — burnout research links this pattern to reduced output on Monday–Tuesday
-- **After midnight** — sleep deprivation at this level impairs logical reasoning at roughly 0.05 BAC
-
----
-
-## Configure Cats
-
-Click the cat icon in the menu bar, then open **Settings** to:
+Click 🐱 in the menu bar → **Settings** to:
 
 - Add or remove cats
-- Name each cat and pick a colour (orange, black, white, grey, pink)
-- Set size (small / medium / large)
+- Name each cat
+- Set colour: orange, black, white, grey, pink
+- Set size: small, medium, large
 - Enable or disable individual cats
+
+Multiple cats can run simultaneously — useful if you're juggling multiple terminal sessions.
 
 ---
 
-## Grant macOS Permissions
+### Grant macOS Permissions
+
+To read your AI CLI sessions:
 
 **System Settings → Privacy & Security → Accessibility → enable Electron**
 
-Without this, the cat still runs. It catches midnight sessions and weekend overwork from the system clock alone. With Accessibility enabled, it reads your terminal buffer and catches the prompting-behaviour triggers.
+Without this permission, the cat still works — it catches midnight coding and weekend overwork from the system clock. With it, it reads your terminal buffer and catches all prompting-behaviour triggers.
 
----
-
-## Privacy
-
-- No network requests
-- No session content written to disk
-- Terminal buffer is read, analyzed in memory, and discarded immediately
-- Only cat configuration (name, color, size) is persisted
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ---
 
@@ -141,25 +206,115 @@ Without this, the cat still runs. It catches midnight sessions and weekend overw
 
 ```
 src/
-  core/        — pure pattern matching, trigger logic (no I/O)
-  service/     — monitor orchestration, roast selection
-  infra/       — AppleScript execution, config file I/O
-interface/     — Electron tray, windows, IPC handlers
-renderer/      — cat.html, settings.html
-main.js        — entry point only
-preload.js     — IPC bridge
+  core/          — pure functions only: pattern matching, trigger evaluation (no I/O)
+  service/       — orchestration: Monitor class, roast selection
+  infra/         — OS and file boundaries: AppleScript, config persistence
+interface/       — Electron UI: tray, windows, IPC handlers
+renderer/        — cat.html, settings.html
+main.js          — entry point only: boots app, owns state, wires modules
+preload.js       — contextIsolation IPC bridge
 ```
+
+Dependencies flow top-down only. `src/core` has no imports from other layers.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ---
 
-## Extend Roasts
+## Roadmap
 
-Open `roasts.js`. Each trigger maps to an array of strings. Add yours.
+- [x] Animated SVG cat with 7 emotion states
+- [x] Evidence-based roasting (no random timer)
+- [x] Multiple cats, each configurable
+- [x] Demo mode
+- [x] macOS Accessibility integration
+- [ ] Windows support (PowerShell session monitoring)
+- [ ] Linux support (X11/Wayland terminal reading)
+- [ ] Browser extension for web-based AI apps (Claude.ai, ChatGPT)
+- [ ] Token usage estimation from session length
+- [ ] Custom roast packs (community contributed)
 
-Rules: fact-based, meme tone, under ~200 chars if possible. See [CONTRIBUTING.md](CONTRIBUTING.md).
+See [open issues](https://github.com/ychxnn/roast-cat/issues) for the full list of proposed features and known bugs.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+## Contributing
+
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are greatly appreciated.
+
+If you have a suggestion, please fork the repo and open a pull request, or open an issue with the tag `enhancement`. And if this project saved you from a midnight deployment disaster, consider giving it a star.
+
+**Adding a roast:**
+
+1. Open `src/service/roasts.js`
+2. Find the right trigger category
+3. Add your string — it must be fact-based with a source
+4. Open a PR using the template (it asks for the source citation)
+
+**Adding a trigger:**
+
+1. Add the pure evaluation logic to `src/core/triggers.js`
+2. Wire it in `src/service/monitor.js`
+3. Add roast text to `src/service/roasts.js`
+4. Map it to a cat emotion in `main.js`
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide.
+
+**Fork the project:**
+
+1. Fork the repo
+2. Create your branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 
 ---
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+## Contact
+
+ychxnn — [@ychxnn](https://github.com/ychxnn)
+
+Project Link: [https://github.com/ychxnn/roast-cat](https://github.com/ychxnn/roast-cat)
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+## Acknowledgments
+
+- [othneildrew's Best README Template](https://github.com/othneildrew/Best-README-Template) — structure of this README
+- [MindStudio — Context Rot in AI Coding Agents](https://www.mindstudio.ai/blog/context-rot-ai-coding-agents-explained) — the research behind the context rot triggers
+- [DEV Community — When Long Chats Drift](https://dev.to/himanshu_jetani_0a4817c3f/when-long-chats-drift-context-windows-and-hidden-errors-in-ai-assisted-coding-31e4) — middle token problem documentation
+- [Vibe Coding on Reddit](https://www.morphllm.com/reddit-vibe-coding) — the 16-of-18 production failure stat
+- [Img Shields](https://shields.io) — badges
+- [contrib.rocks](https://contrib.rocks) — contributor image
+
+<p align="right">(<a href="#table-of-contents">back to top</a>)</p>
+
+---
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[contributors-shield]: https://img.shields.io/github/contributors/ychxnn/roast-cat.svg?style=for-the-badge
+[contributors-url]: https://github.com/ychxnn/roast-cat/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/ychxnn/roast-cat.svg?style=for-the-badge
+[forks-url]: https://github.com/ychxnn/roast-cat/fork
+[stars-shield]: https://img.shields.io/github/stars/ychxnn/roast-cat.svg?style=for-the-badge
+[stars-url]: https://github.com/ychxnn/roast-cat/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ychxnn/roast-cat.svg?style=for-the-badge
+[issues-url]: https://github.com/ychxnn/roast-cat/issues
+[license-shield]: https://img.shields.io/github/license/ychxnn/roast-cat.svg?style=for-the-badge
+[license-url]: https://github.com/ychxnn/roast-cat/blob/main/LICENSE
+[ci-shield]: https://img.shields.io/github/actions/workflow/status/ychxnn/roast-cat/ci.yml?style=for-the-badge&label=CI
+[ci-url]: https://github.com/ychxnn/roast-cat/actions/workflows/ci.yml
