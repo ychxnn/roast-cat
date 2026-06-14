@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      background:transparent;
+      overflow:hidden;
+      user-select:none;
+      -webkit-user-select:none;
+      font-family:'Comic Sans MS','Chalkboard SE',cursive;
+    }
+
+    #scene{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-end;
+      width:100%;
+      height:100%;
+    }
+
+    /* ── Speech bubble ── */
+    #bubble{
+      position:absolute;
+      top:4px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#fff;
+      border:2.5px solid #333;
+      border-radius:16px;
+      padding:8px 12px;
+      font-size:11px;
+      line-height:1.45;
+      color:#222;
+      width:calc(100% - 16px);
+      max-width:260px;
+      text-align:center;
+      box-shadow:3px 3px 0 #ccc;
+      opacity:0;
+      transition:opacity 0.4s;
+      pointer-events:none;
+      z-index:20;
+    }
+    #bubble.show{opacity:1}
+    #bubble::after{
+      content:'';position:absolute;
+      bottom:-13px;left:50%;transform:translateX(-50%);
+      border:7px solid transparent;border-top-color:#333;
+    }
+    #bubble::before{
+      content:'';position:absolute;z-index:1;
+      bottom:-10px;left:50%;transform:translateX(-50%);
+      border:7px solid transparent;border-top-color:#fff;
+    }
+
+    /* ── Cat ── */
+    #cat-wrap{
+      position:relative;
+      cursor:grab;
+      margin-bottom:10px;
+      transition:filter 0.4s;
+    }
+    #cat-wrap:active{cursor:grabbing}
+    #cat-wrap svg{overflow:visible;display:block}
+
+    /* ── Body animations ── */
+    @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+    @keyframes wag{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+    @keyframes leg-a{0%,100%{transform:rotate(0deg)}50%{transform:rotate(22deg)}}
+    @keyframes leg-b{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-22deg)}}
+    @keyframes ear-twitch{0%,88%,100%{transform:rotate(0deg)}91%{transform:rotate(-10deg)}95%{transform:rotate(6deg)}}
+    @keyframes float-z{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(6px,-20px)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+    @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.12)}100%{transform:scale(1)}}
+    @keyframes blush-pulse{0%,100%{opacity:.45}50%{opacity:.75}}
+
+    #body-g{animation:bob 1.2s ease-in-out infinite;transform-origin:center bottom}
+    #tail{animation:wag 1s ease-in-out infinite;transform-origin:8px 16px}
+    #leg-fl{animation:leg-a .55s ease-in-out infinite;transform-origin:50% 0%}
+    #leg-fr{animation:leg-b .55s ease-in-out infinite;transform-origin:50% 0%}
+    #leg-bl{animation:leg-b .55s ease-in-out infinite;transform-origin:50% 0%}
+    #leg-br{animation:leg-a .55s ease-in-out infinite;transform-origin:50% 0%}
+    #ear-l{animation:ear-twitch 3.2s ease-in-out infinite;transform-origin:50% 100%}
+    #ear-r{animation:ear-twitch 3.2s ease-in-out infinite .2s;transform-origin:50% 100%}
+
+    .blush{animation:blush-pulse 2s ease-in-out infinite}
+
+    /* emotion-based idle overrides */
+    body.e-sleep  #leg-fl,body.e-sleep  #leg-fr,
+    body.e-sleep  #leg-bl,body.e-sleep  #leg-br,
+    body.e-bored  #leg-fl,body.e-bored  #leg-fr,
+    body.e-bored  #leg-bl,body.e-bored  #leg-br{animation:none}
+
+    body.e-angry  #body-g{animation:shake .18s ease-in-out 3}
+    body.e-happy  #body-g{animation:pop .4s ease-in-out 2,bob 1.2s ease-in-out infinite .8s}
+
+    /* ── Faces (only one .active shown) ── */
+    .face{display:none}
+    .face.active{display:block}
+
+    /* ── Close btn ── */
+    #close{
+      position:absolute;top:6px;right:8px;
+      width:20px;height:20px;
+      background:rgba(0,0,0,.14);border:none;border-radius:50%;
+      cursor:pointer;font-size:11px;color:#555;
+      display:flex;align-items:center;justify-content:center;
+      opacity:0;transition:opacity .2s;
+      pointer-events:auto;
+    }
+    body:hover #close{opacity:1}
+  </style>
+</head>
+<body class="e-idle">
+<div id="scene">
+  <div id="bubble"></div>
+  <div id="cat-wrap">
+    <svg id="cat" viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg">
+      <!-- colours driven by JS CSS vars -->
+      <defs>
+        <style>
+          :root{
+            --body:#f4a261;--tummy:#fff3e0;--ear:#ffb7c5;
+            --accent:#e07b39;--eye:#1a1a2e;--nose:#ff6b9d;
+          }
+        </style>
+      </defs>
+
+      <!-- tail -->
+      <g id="tail" style="transform-origin:38px 88px">
+        <path d="M38 88 Q8 72 16 52 Q20 40 30 47" fill="none" stroke="var(--body)" stroke-width="8" stroke-linecap="round"/>
+        <circle cx="29" cy="44" r="7" fill="var(--tummy)"/>
+      </g>
+
+      <!-- back legs -->
+      <g id="leg-bl" style="transform-origin:42px 102px">
+        <rect x="37" y="102" width="11" height="22" rx="5" fill="var(--body)"/>
+        <ellipse cx="42" cy="125" rx="8" ry="4" fill="var(--accent)"/>
+      </g>
+      <g id="leg-br" style="transform-origin:78px 102px">
+        <rect x="73" y="102" width="11" height="22" rx="5" fill="var(--body)"/>
+        <ellipse cx="78" cy="125" rx="8" ry="4" fill="var(--accent)"/>
+      </g>
+
+      <!-- body group (bobs) -->
+      <g id="body-g" style="transform-origin:60px 95px">
+        <!-- body -->
+        <ellipse cx="60" cy="90" rx="32" ry="26" fill="var(--body)"/>
+        <!-- tummy -->
+        <ellipse cx="60" cy="95" rx="17" ry="16" fill="var(--tummy)"/>
+
+        <!-- front legs -->
+        <g id="leg-fl" style="transform-origin:50px 106px">
+          <rect x="45" y="106" width="11" height="22" rx="5" fill="var(--body)"/>
+          <ellipse cx="50" cy="129" rx="8" ry="4" fill="var(--accent)"/>
+        </g>
+        <g id="leg-fr" style="transform-origin:70px 106px">
+          <rect x="65" y="106" width="11" height="22" rx="5" fill="var(--body)"/>
+          <ellipse cx="70" cy="129" rx="8" ry="4" fill="var(--accent)"/>
+        </g>
+
+        <!-- neck -->
+        <ellipse cx="60" cy="68" rx="17" ry="11" fill="var(--body)"/>
+
+        <!-- head -->
+        <circle cx="60" cy="50" r="28" fill="var(--body)"/>
+
+        <!-- ears -->
+        <g id="ear-l">
+          <polygon points="33,34 24,10 46,26" fill="var(--body)"/>
+          <polygon points="34,32 28,14 44,25" fill="var(--ear)"/>
+        </g>
+        <g id="ear-r">
+          <polygon points="87,34 96,10 74,26" fill="var(--body)"/>
+          <polygon points="86,32 92,14 76,25" fill="var(--ear)"/>
+        </g>
+
+        <!-- blush -->
+        <ellipse class="blush" cx="42" cy="57" rx="7" ry="4.5" fill="#ffb7c5" opacity=".45"/>
+        <ellipse class="blush" cx="78" cy="57" rx="7" ry="4.5" fill="#ffb7c5" opacity=".45"/>
+
+        <!-- nose -->
+        <path d="M57 57 L60 60 L63 57 Z" fill="var(--nose)"/>
+
+        <!-- whiskers -->
+        <line x1="25" y1="55" x2="50" y2="58" stroke="#555" stroke-width="1" stroke-linecap="round"/>
+        <line x1="23" y1="61" x2="49" y2="62" stroke="#555" stroke-width="1" stroke-linecap="round"/>
+        <line x1="95" y1="55" x2="70" y2="58" stroke="#555" stroke-width="1" stroke-linecap="round"/>
+        <line x1="97" y1="61" x2="71" y2="62" stroke="#555" stroke-width="1" stroke-linecap="round"/>
+
+        <!-- ── FACES ── -->
+
+        <!-- normal -->
+        <g class="face active" id="face-idle">
+          <ellipse cx="50" cy="47" rx="6" ry="7" fill="var(--eye)"/>
+          <circle cx="52" cy="45" r="2" fill="white"/>
+          <ellipse cx="70" cy="47" rx="6" ry="7" fill="var(--eye)"/>
+          <circle cx="72" cy="45" r="2" fill="white"/>
+          <path d="M55 63 Q60 68 65 63" fill="none" stroke="#c0392b" stroke-width="1.8" stroke-linecap="round"/>
+        </g>
+
+        <!-- happy ^.^ -->
+        <g class="face" id="face-happy">
+          <path d="M44 49 Q50 42 56 49" fill="none" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M64 49 Q70 42 76 49" fill="none" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M52 63 Q60 71 68 63" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+          <!-- extra blush -->
+          <ellipse cx="42" cy="57" rx="9" ry="6" fill="#ff6b9d" opacity=".35"/>
+          <ellipse cx="78" cy="57" rx="9" ry="6" fill="#ff6b9d" opacity=".35"/>
+        </g>
+
+        <!-- angry >.< -->
+        <g class="face" id="face-angry">
+          <!-- brows -->
+          <line x1="42" y1="38" x2="58" y2="43" stroke="var(--eye)" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="78" y1="38" x2="62" y2="43" stroke="var(--eye)" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- squint eyes -->
+          <path d="M44 48 Q50 44 56 48" fill="none" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M64 48 Q70 44 76 48" fill="none" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <!-- frown -->
+          <path d="M54 66 Q60 61 66 66" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- shocked O.O -->
+        <g class="face" id="face-shocked">
+          <circle cx="50" cy="47" r="9" fill="var(--eye)"/>
+          <circle cx="53" cy="44" r="3" fill="white"/>
+          <circle cx="70" cy="47" r="9" fill="var(--eye)"/>
+          <circle cx="73" cy="44" r="3" fill="white"/>
+          <ellipse cx="60" cy="65" rx="5" ry="6" fill="#c0392b"/>
+        </g>
+
+        <!-- bored -.- -->
+        <g class="face" id="face-bored">
+          <rect x="43" y="45" width="14" height="5" rx="2.5" fill="var(--eye)" opacity=".7"/>
+          <rect x="63" y="45" width="14" height="5" rx="2.5" fill="var(--eye)" opacity=".7"/>
+          <line x1="54" y1="64" x2="66" y2="64" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- smug ;) -->
+        <g class="face" id="face-smug">
+          <!-- wink -->
+          <line x1="44" y1="47" x2="56" y2="47" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <!-- normal eye -->
+          <ellipse cx="70" cy="47" rx="6" ry="7" fill="var(--eye)"/>
+          <circle cx="72" cy="45" r="2" fill="white"/>
+          <!-- smirk -->
+          <path d="M56 63 Q63 68 67 64" fill="none" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>
+        </g>
+
+        <!-- sleep - - with zzz -->
+        <g class="face" id="face-sleep">
+          <line x1="44" y1="47" x2="56" y2="47" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="64" y1="47" x2="76" y2="47" stroke="var(--eye)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="54" y1="63" x2="66" y2="63" stroke="#c0392b" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- ZZZs -->
+          <text x="78" y="32" font-size="10" font-weight="bold" fill="#6c8ebf" style="animation:float-z 2s ease-out infinite">Z</text>
+          <text x="84" y="22" font-size="8"  font-weight="bold" fill="#6c8ebf" style="animation:float-z 2s ease-out infinite .6s">Z</text>
+          <text x="89" y="14" font-size="6"  font-weight="bold" fill="#6c8ebf" style="animation:float-z 2s ease-out infinite 1.2s">Z</text>
+        </g>
+
+      </g><!-- /body-g -->
+    </svg>
+  </div>
+  <button id="close">✕</button>
+</div>
+
+<script>
+const { api } = window;
+const { getRoast } = (() => {
+  // inline the roast picker so the renderer doesn't need node require
+  const R = {
+    contextRot60:["you've been in this session for over an hour. transformer attention degrades as context fills — the model is already deprioritizing what you told it early on. documented behaviour, not a vibe.","60 minutes, one context window. the AI answering you now is not the one you briefed at the start. constraints get buried. decisions get overridden silently."],
+    contextRot90:["90 minutes in one chat. past this point researchers call it 'middle token problem' — the model loses track of what's in the middle. your earliest constraints are effectively gone.","hour and a half. the AI has seen so many failed attempts and pivots that output quality is measurably lower than minute one. start a new chat."],
+    contextRot120:["two hours. the context window is a landfill. every output is generated with degraded attention over a mountain of failed attempts. new chat. now.","2 hours, one AI session. whatever you started building is buried under context noise. close this. open a new one. write a clean brief."],
+    cogWall:["90 minutes of continuous focus. cognitive load research finds performance degrades past this threshold — not because you're tired, because working memory fills up. 5 min break restores measurable capacity.","the 90-minute focus wall is real and documented. your ability to catch logical errors is lower than at the start. this is how the prefrontal cortex works."],
+    errorLoop:["that error has appeared multiple times. the AI has no new information each time you paste it. YOU do — you know which approaches don't work. that's a diagnosis, not just a paste.","pasting the same traceback repeatedly is not debugging. the AI will generate a different-sounding wrong answer each time. read the error. locate the line. then prompt.","the AI can't fix what it hasn't been told to look for. the same error appearing again means the approach is wrong, not the prompt."],
+    panicPrompt:["rapid-fire prompting fills your context with low-signal turns. the model doesn't process faster because you send faster. it just has less room for good reasoning.","sending prompts faster doesn't make the AI smarter. it fills the context with noise and degrades output quality. one clear prompt with full context beats four panicked ones."],
+    noContext:["'fix this' or 'debug' with no error message, no stack trace, no reproduction steps. the AI will guess. its guess will sound confident. it will be wrong.","asking the AI to debug without the error is asking a doctor to diagnose without symptoms. the model will confabulate a plausible-sounding answer. plausible ≠ correct.","the three things a debugging prompt needs: what you expected, what happened, where it happened. your prompt had none of those."],
+    postOutput:["the AI just produced a large output and you haven't asked a single follow-up question. 16 of 18 AI-code production failures start with unreviewed large outputs. you are the peer review.","large AI output, zero follow-up. the model doesn't catch its own edge cases or unhandled nulls. someone has to read it. that's you.","a large output with no verification is a liability, not a deliverable. the AI doesn't know your edge cases or production constraints. you do."],
+    weekendOverwork:["2 hours coding on a weekend. burnout research links this pattern to reduced cognitive output on Monday and Tuesday. you're borrowing against the week.","weekend session past 2 hours. recovery time isn't optional — it's when memory consolidates and creative problem-solving resets. this has a measurable cost later."],
+    midnight:["past midnight and in an active coding session. sleep deprivation at this level impairs logical reasoning at roughly the rate of 0.05 BAC. your PR reviewers will be sober.","after midnight your prefrontal cortex — the part that catches bad logic — is measurably offline. the AI makes the same mistakes at 2am as at 2pm. you don't.","the bugs you introduce after midnight take 3x longer to find the next day. documented in software engineering research, not just a feeling."],
+  };
+  const pick = a => a[Math.floor(Math.random()*a.length)];
+  return { getRoast: (trigger) => R[trigger] ? pick(R[trigger]) : null };
+})();
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let cat = { color:'orange', size:'medium', name:'Roast Cat', enabled:true };
+let isDragging = false, dragX = 0, dragY = 0, hasDragged = false;
+
+const COLORS = {
+  orange: { body:'#f4a261', tummy:'#fff3e0', ear:'#ffb7c5', accent:'#e07b39', eye:'#1a1a2e', nose:'#ff6b9d' },
+  black:  { body:'#2d2d2d', tummy:'#4a4a4a', ear:'#ff69b4', accent:'#111',    eye:'#fff',    nose:'#ff6b9d' },
+  white:  { body:'#f0f0f0', tummy:'#ffffff', ear:'#ffb7c5', accent:'#ccc',    eye:'#1a1a2e', nose:'#ff6b9d' },
+  grey:   { body:'#9e9e9e', tummy:'#e0e0e0', ear:'#ffb7c5', accent:'#757575', eye:'#1a1a2e', nose:'#ff6b9d' },
+  pink:   { body:'#ff9eb5', tummy:'#ffd6e0', ear:'#ff6b9d', accent:'#e91e8c', eye:'#1a1a2e', nose:'#9c27b0' },
+};
+
+const EMOTION_MAP = {
+  idle:'idle', happy:'happy', angry:'angry', shocked:'shocked',
+  bored:'bored', smug:'smug', sleep:'sleep',
+};
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const bubble = document.getElementById('bubble');
+const wrap   = document.getElementById('cat-wrap');
+const svgEl  = document.getElementById('cat');
+const root   = document.documentElement;
+
+function applyColor(scheme) {
+  const c = COLORS[scheme] || COLORS.orange;
+  root.style.setProperty('--body',   c.body);
+  root.style.setProperty('--tummy',  c.tummy);
+  root.style.setProperty('--ear',    c.ear);
+  root.style.setProperty('--accent', c.accent);
+  root.style.setProperty('--eye',    c.eye);
+  root.style.setProperty('--nose',   c.nose);
+}
+
+function setEmotion(name) {
+  const e = EMOTION_MAP[name] || 'idle';
+  document.body.className = `e-${e}`;
+  document.querySelectorAll('.face').forEach(f => f.classList.remove('active'));
+  const face = document.getElementById(`face-${e}`);
+  if (face) face.classList.add('active');
+}
+
+let bubbleTimer = null;
+function showBubble(text, durationMs = 7000) {
+  bubble.textContent = text;
+  bubble.classList.add('show');
+  clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => bubble.classList.remove('show'), durationMs);
+}
+
+function doRoast(trigger, emotion) {
+  if (!cat.enabled) return;
+  const text = getRoast(trigger);
+  if (!text) return; // no roast without a reason
+  setEmotion(emotion || 'smug');
+  showBubble(text, 9000);
+  setTimeout(() => setEmotion('idle'), 10000);
+}
+
+// ── IPC listeners ─────────────────────────────────────────────────────────────
+api.onInit(config => {
+  cat = config;
+  applyColor(cat.color);
+});
+
+// Manual roast on demand — picks a random trigger so it's still factual
+const MANUAL_TRIGGERS = [
+  ['contextRot60','shocked'], ['errorLoop','angry'], ['cogWall','bored'],
+  ['noContext','bored'], ['postOutput','smug'], ['midnight','sleep'],
+];
+api.onRoast(() => {
+  const [t, e] = MANUAL_TRIGGERS[Math.floor(Math.random() * MANUAL_TRIGGERS.length)];
+  doRoast(t, e);
+});
+
+api.onContext(({ trigger, emotion }) => {
+  doRoast(trigger, emotion);
+});
+
+// ── Drag ──────────────────────────────────────────────────────────────────────
+wrap.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  isDragging = true;
+  hasDragged = false;
+  dragX = e.screenX;
+  dragY = e.screenY;
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = e.screenX - dragX;
+  const dy = e.screenY - dragY;
+  if (Math.abs(dx) > 2 || Math.abs(dy) > 2) { hasDragged = true; }
+  api.moveWindow(dx, dy);
+  dragX = e.screenX;
+  dragY = e.screenY;
+});
+
+document.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+  if (!hasDragged) {
+    const [t, e] = MANUAL_TRIGGERS[Math.floor(Math.random() * MANUAL_TRIGGERS.length)];
+    doRoast(t, e);
+  }
+});
+
+// ── Close btn ─────────────────────────────────────────────────────────────────
+document.getElementById('close').addEventListener('click', () => window.close());
+</script>
+</body>
+</html>
