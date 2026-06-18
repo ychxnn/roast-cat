@@ -10,6 +10,7 @@ const { catWindows, createCatWindow, syncCatWindows, dispatch, openSettings,
 const { registerIpcHandlers }                                = require('./interface/ipc');
 const Monitor                                                = require('./src/service/monitor');
 const UsageTracker                                           = require('./src/service/usage');
+const { getFrontmostApp }                                    = require('./src/infra/applescript');
 
 if (!app.requestSingleInstanceLock()) { app.quit(); process.exit(0); }
 
@@ -22,6 +23,27 @@ let prefs   = {};
 let refresh = null;
 let monitor = null;
 let usage   = null;
+let autoQuiet   = false;   // set by the focus-app watcher
+let focusTimer  = null;
+
+// Effective quiet = manual quiet OR auto-quiet (a focus app is frontmost).
+function applyEffectiveBehavior() {
+  setCatBehavior({ activity: prefs.activity, quiet: prefs.quiet || autoQuiet, sound: prefs.sound });
+}
+
+// Poll the frontmost app; auto-enable quiet while a chosen focus app is in front.
+function startFocusWatch() {
+  if (focusTimer) { clearInterval(focusTimer); focusTimer = null; }
+  if (!Array.isArray(prefs.focusApps) || !prefs.focusApps.length) {
+    if (autoQuiet) { autoQuiet = false; applyEffectiveBehavior(); }
+    return;
+  }
+  focusTimer = setInterval(async () => {
+    const app = await getFrontmostApp();
+    const match = !!app && prefs.focusApps.some(a => a && app.toLowerCase().includes(a.toLowerCase()));
+    if (match !== autoQuiet) { autoQuiet = match; applyEffectiveBehavior(); }
+  }, 4000);
+}
 
 // ── Shared handlers ───────────────────────────────────────────────────────────
 
@@ -45,8 +67,8 @@ function toggleCat(catId) {
   refresh();
 }
 
-// Roasts are suppressed entirely while quiet/focus mode is on.
-function onContext(event) { if (!prefs.quiet) dispatch(event, cats); }
+// Roasts are suppressed entirely while quiet/focus mode is on (manual or auto).
+function onContext(event) { if (!(prefs.quiet || autoQuiet)) dispatch(event, cats); }
 
 function startMonitor() {
   if (IS_DEMO) return;
@@ -89,7 +111,8 @@ app.whenReady().then(() => {
   cats = loadCats();
   prefs = loadPrefs();
   setCatTheme(prefs.theme);
-  setCatBehavior({ activity: prefs.activity, quiet: prefs.quiet });
+  applyEffectiveBehavior();
+  startFocusWatch();
 
   ;({ refresh } = createTray(
     () => cats,
@@ -102,7 +125,7 @@ app.whenReady().then(() => {
       onToggleQuiet: () => {
         prefs.quiet = !prefs.quiet;
         savePrefs(prefs);
-        setCatBehavior({ activity: prefs.activity, quiet: prefs.quiet });
+        applyEffectiveBehavior();
         refresh();
       },
       onQuit: () => app.quit(),
@@ -146,10 +169,14 @@ app.whenReady().then(() => {
       return true;
     },
     setBehavior: (b) => {
+      let focusChanged = false;
       if (b && typeof b.activity === 'number') prefs.activity = b.activity;
       if (b && typeof b.quiet === 'boolean')   prefs.quiet = b.quiet;
+      if (b && typeof b.sound === 'boolean')   prefs.sound = b.sound;
+      if (b && Array.isArray(b.focusApps))     { prefs.focusApps = b.focusApps; focusChanged = true; }
       savePrefs(prefs);
-      setCatBehavior({ activity: prefs.activity, quiet: prefs.quiet });
+      applyEffectiveBehavior();
+      if (focusChanged) startFocusWatch();
       refresh();
       return true;
     },
@@ -167,7 +194,7 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', e => e.preventDefault());
-app.on('will-quit', () => { if (monitor) monitor.stop(); if (usage) usage.stop(); });
+app.on('will-quit', () => { if (monitor) monitor.stop(); if (usage) usage.stop(); if (focusTimer) clearInterval(focusTimer); });
 
 // ── Demo ──────────────────────────────────────────────────────────────────────
 

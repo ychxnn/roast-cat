@@ -38,4 +38,16 @@ function getTerminalContent() {
   });
 }
 
-module.exports = { getTerminalContent };
+// Returns the name of the frontmost app (e.g. "Code", "zoom.us"), or null.
+function getFrontmostApp() {
+  return new Promise(resolve => {
+    if (process.platform !== 'darwin') return resolve(null);
+    exec(
+      `osascript -e 'tell application "System Events" to name of first application process whose frontmost is true'`,
+      { timeout: 3000 },
+      (err, stdout) => resolve(err ? null : (stdout || '').trim() || null),
+    );
+  });
+}
+
+module.exports = { getTerminalContent, getFrontmostApp };

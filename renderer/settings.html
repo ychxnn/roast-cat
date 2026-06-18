@@ -142,6 +142,19 @@
       <label class="toggle"><input type="checkbox" id="quiet"/><span class="slider"></span></label>
       <span style="font-size:11px;color:var(--textSoft)">no roasts · stays still</span>
     </div>
+    <div class="row">
+      <label>Sound</label>
+      <label class="toggle"><input type="checkbox" id="sound"/><span class="slider"></span></label>
+      <span style="font-size:11px;color:var(--textSoft)">soft purr / meow on pet &amp; roast</span>
+    </div>
+    <div class="row">
+      <label>Focus apps</label>
+      <input type="text" id="focus-apps" placeholder="e.g. Code, zoom.us"
+        style="flex:1;min-width:0;background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:8px;padding:5px 9px;font-size:12px;outline:none"/>
+    </div>
+    <div class="row" style="margin-top:0">
+      <span style="font-size:11px;color:var(--textSoft)">auto-switch to quiet while one of these apps is focused (comma-separated)</span>
+    </div>
   </div>
 
   <div class="section">
@@ -173,7 +186,7 @@
   <script>
   // NOTE: window.api is a NON-configurable global (contextBridge). Do NOT declare
   // a top-level `const api` — it throws "already declared" and kills this script.
-  const APPS = ['any','claude','chatgpt','grok','gemini','codex','perplexity','copilot','claude-cli','aider'];
+  const APPS = ['any','claude','aider','codex','llm','sgpt']; // only CLI tools the buffer reader can actually detect
   const COLORS = ['orange','black','white','grey','pink'];
   const SIZE_MAP = { small:190, medium:250, large:310 }; // legacy preset → px
   function sizeVal(s){ return (typeof s === 'number') ? s : (SIZE_MAP[s] || 250); }
@@ -201,6 +214,8 @@
     act.value = (prefs && typeof prefs.activity === 'number') ? prefs.activity : 60;
     actVal.textContent = act.value;
     document.getElementById('quiet').checked = !!(prefs && prefs.quiet);
+    document.getElementById('sound').checked = !!(prefs && prefs.sound);
+    document.getElementById('focus-apps').value = (prefs && Array.isArray(prefs.focusApps)) ? prefs.focusApps.join(', ') : '';
     cats = await window.api.getCats();
     render();
   }
@@ -211,6 +226,11 @@
     act.addEventListener('input', () => { actVal.textContent = act.value; });
     act.addEventListener('change', () => window.api.setBehavior({ activity: +act.value }));
     document.getElementById('quiet').addEventListener('change', e => window.api.setBehavior({ quiet: e.target.checked }));
+    document.getElementById('sound').addEventListener('change', e => window.api.setBehavior({ sound: e.target.checked }));
+    document.getElementById('focus-apps').addEventListener('change', e => {
+      const apps = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+      window.api.setBehavior({ focusApps: apps });
+    });
   })();
 
   document.querySelectorAll('.theme-opt').forEach(o => o.addEventListener('click', () => {

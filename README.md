@@ -148,7 +148,7 @@ Cycles through all 9 triggers with a 10-second pause between each.
 
 ### Supported Tools
 
-The cat reads the terminal buffer from Terminal, iTerm2, and Warp:
+The cat reads the terminal buffer from **Terminal** and **iTerm2** (whichever is frontmost when it polls):
 
 | Tool | Detected by |
 |------|-------------|
@@ -158,7 +158,7 @@ The cat reads the terminal buffer from Terminal, iTerm2, and Warp:
 | `llm`, `sgpt` | terminal buffer content |
 | Any tool with `Human:` / `Assistant:` format | terminal buffer content |
 
-> macOS only for session reading. Time-based triggers (midnight, weekend overwork) work on all platforms.
+> Prompting-behaviour triggers require macOS + Accessibility **and** Terminal/iTerm2 to be the focused window when the cat polls (every 5s). Time-of-day and activity-based triggers (midnight, weekend overwork, and the health roasts) work without Accessibility — they read the system clock and your keyboard-activity, not your apps.
 
 ---
 
@@ -223,7 +223,7 @@ To read your AI CLI sessions:
 
 **System Settings → Privacy & Security → Accessibility → enable Electron**
 
-Without this permission, the cat still works — it catches midnight coding and weekend overwork from the system clock. With it, it reads your terminal buffer and catches all prompting-behaviour triggers.
+Without this permission, the cat still works — it catches midnight coding, weekend overwork, and the health roasts (no breaks, long days, day streaks) from the system clock and your keyboard activity. With it, it also reads the Terminal/iTerm2 buffer and catches the prompting-behaviour triggers (context rot, error loops, panic prompting, etc.).
 
 <p align="right">(<a href="#table-of-contents">back to top</a>)</p>
 

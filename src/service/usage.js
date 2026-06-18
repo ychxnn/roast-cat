@@ -17,13 +17,15 @@ const EYE_REST_MIN   = 25;              // 20-20-20 eye rule
 const NO_BREAK_MIN   = 50;              // sat too long without moving
 const LONG_DAY_MIN   = 8 * 60;          // 8h active today
 const STREAK_DAYS    = 7;               // worked every day for a week
+const WEEKEND_MIN    = 2 * 60;          // 2h active on a Sat/Sun
 
 // cooldowns (ms) so a roast doesn't repeat back-to-back
 const COOL = {
-  eyeRest:  25 * 60 * 1000,
-  noBreak:  30 * 60 * 1000,
-  longDay:  60 * 60 * 1000,
-  dayStreak:12 * 60 * 60 * 1000,
+  eyeRest:        25 * 60 * 1000,
+  noBreak:        30 * 60 * 1000,
+  longDay:        60 * 60 * 1000,
+  dayStreak:      12 * 60 * 60 * 1000,
+  weekendOverwork: 3 * 60 * 60 * 1000,
 };
 
 function dayKey(d = new Date()) { return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
@@ -115,6 +117,11 @@ class UsageTracker extends EventEmitter {
 
     if (todayMin >= LONG_DAY_MIN && this._cooled('longDay'))   this._fire('longDay', 'shocked');
     if ((this._data.streak || 0) >= STREAK_DAYS && this._cooled('dayStreak')) this._fire('dayStreak', 'angry');
+
+    const day = new Date().getDay(); // weekend overwork — activity-based, no Accessibility needed
+    if ((day === 0 || day === 6) && todayMin >= WEEKEND_MIN && this._cooled('weekendOverwork')) {
+      this._fire('weekendOverwork', 'bored');
+    }
   }
 }
 
